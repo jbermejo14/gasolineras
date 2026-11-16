@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Precios Gasolineras España | MITECO en Tiempo Real</title>
+  <meta name="description" content="Consulta y compara los precios de gasolineras en España actualizados cada 30 minutos desde la API oficial de Transición Ecológica (MITECO).">
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 22h12"></path>
+            <path d="M4 9h10"></path>
+            <path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"></path>
+            <path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>GASOLINERAS <span>ESPAÑA</span></h1>
+          <p class="brand-subtitle">Datos oficiales del Ministerio para la Transición Ecológica (MITECO)</p>
+        </div>
+      </div>
+
+      <!-- Sync & Auto-update Status + Theme Toggle -->
+      <div class="header-status">
+        <div class="sync-badge" title="Auto-actualización cada 30 min">
+          <span class="status-dot pulse"></span>
+          <div class="status-texts">
+            <span class="status-main" id="statusLastUpdate">Cargando datos...</span>
+            <span class="status-timer">Próxima en: <strong id="countdownTimer">--:--</strong></span>
+          </div>
+        </div>
+
+        <button id="btnManualRefresh" class="btn-refresh" title="Forzar actualización ahora">
+          <svg id="refreshIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          <span>Actualizar</span>
+        </button>
+
+        <!-- Theme Toggle (Oscuro / Claro) -->
+        <button id="btnThemeToggle" class="btn-theme-toggle" title="Cambiar a Modo Claro / Oscuro" aria-label="Cambiar tema">
+          <svg id="themeIconDark" class="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Sun icon for switching to light -->
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg id="themeIconLight" class="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <!-- Moon icon for switching to dark -->
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <span id="themeText">Claro</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container main-layout">
+    
+    <!-- Fuel Type Tabs Bar -->
+    <section class="fuel-selector-section">
+      <div class="section-label">Selecciona tipo de carburante:</div>
+      <div class="fuel-chips" id="fuelChips">
+        <button class="fuel-chip active" data-fuel="gasolina95">
+          <span class="fuel-tag">G95</span>
+          <span class="fuel-name">Gasolina 95 E5</span>
+        </button>
+        <button class="fuel-chip" data-fuel="diesel">
+          <span class="fuel-tag">GAS</span>
+          <span class="fuel-name">Diésel (Gasóleo A)</span>
+        </button>
+        <button class="fuel-chip" data-fuel="gasolina98">
+          <span class="fuel-tag">G98</span>
+          <span class="fuel-name">Gasolina 98</span>
+        </button>
+        <button class="fuel-chip" data-fuel="dieselPremium">
+          <span class="fuel-tag">D+</span>
+          <span class="fuel-name">Diésel Premium</span>
+        </button>
+        <button class="fuel-chip" data-fuel="glp">
+          <span class="fuel-tag">GLP</span>
+          <span class="fuel-name">Autogás (GLP)</span>
+        </button>
+        <button class="fuel-chip" data-fuel="gnc">
+          <span class="fuel-tag">GNC</span>
+          <span class="fuel-name">Gas Natural (GNC)</span>
+        </button>
+      </div>
+
+      <!-- Brand Logos Quick Filter Bar -->
+      <div class="brand-filter-row">
+        <div class="brand-filter-label">Marcas destacadas:</div>
+        <div class="brand-chips" id="brandChips">
+          <button class="brand-chip active" data-brand="">
+            <span>Todas</span>
+          </button>
+          <button class="brand-chip" data-brand="repsol">
+            <img src="/logos/repsol.png" alt="Repsol" class="brand-chip-img">
+            <span>Repsol</span>
+          </button>
+          <button class="brand-chip" data-brand="moeve">
+            <img src="/logos/moeve.png" alt="Moeve" class="brand-chip-img">
+            <span>Moeve</span>
+          </button>
+          <button class="brand-chip" data-brand="ballenoil">
+            <img src="/logos/ballenoil.png" alt="Ballenoil" class="brand-chip-img">
+            <span>Ballenoil</span>
+          </button>
+          <button class="brand-chip" data-brand="bonarea">
+            <img src="/logos/bonarea.png" alt="bonÀrea" class="brand-chip-img">
+            <span>bonÀrea</span>
+          </button>
+          <button class="brand-chip" data-brand="alcampo">
+            <img src="/logos/alcampo.png" alt="Alcampo" class="brand-chip-img">
+            <span>Alcampo</span>
+          </button>
+          <button class="brand-chip" data-brand="carrefour">
+            <img src="/logos/carrefour.png" alt="Carrefour" class="brand-chip-img">
+            <span>Carrefour</span>
+          </button>
+          <button class="brand-chip" data-brand="costco">
+            <img src="/logos/costco.png" alt="Costco" class="brand-chip-img">
+            <span>Costco</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters Bar -->
+    <section class="filter-panel">
+      <div class="filter-row">
+        <!-- Search Input -->
+        <div class="filter-group search-group">
+          <label for="inputSearch">Buscar</label>
+          <div class="input-with-icon">
+            <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="inputSearch" placeholder="Municipio, marca (Repsol, Cepsa...), calle o CP..." autocomplete="off">
+            <button id="btnClearSearch" class="clear-btn" style="display:none;" title="Limpiar">&times;</button>
+          </div>
+        </div>
+
+        <!-- Province Selector -->
+        <div class="filter-group province-group">
+          <label for="selectProvince">Provincia</label>
+          <div class="select-wrapper">
+            <select id="selectProvince">
+              <option value="TODAS">Toda España</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Sort Selector -->
+        <div class="filter-group sort-group">
+          <label for="selectSort">Ordenar por</label>
+          <div class="select-wrapper">
+            <select id="selectSort">
+              <option value="price_asc">Precio: Más baratas primero</option>
+              <option value="price_desc">Precio: Más caras primero</option>
+              <option value="distance_asc" id="optSortDistance" disabled>Distancia: Más cercanas</option>
+              <option value="name_asc">Nombre / Marca A-Z</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Geolocation Button -->
+        <div class="filter-group geo-group">
+          <label>&nbsp;</label>
+          <button id="btnGeo" class="btn-geo" title="Buscar gasolineras cerca de tu ubicación">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+            </svg>
+            <span id="geoBtnText">Cerca de mí</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Secondary Filter Row: Radius & View Toggle -->
+      <div class="filter-subrow">
+        <!-- Radius Selector (visible when geo active) -->
+        <div class="radius-control" id="radiusControl" style="display: none;">
+          <span class="radius-label">Radio de búsqueda:</span>
+          <div class="radius-options">
+            <button class="radius-btn" data-radius="5">5 km</button>
+            <button class="radius-btn active" data-radius="15">15 km</button>
+            <button class="radius-btn" data-radius="30">30 km</button>
+            <button class="radius-btn" data-radius="50">50 km</button>
+          </div>
+          <button id="btnCancelGeo" class="btn-cancel-geo" title="Desactivar filtro de ubicación">Quitar filtro GPS</button>
+        </div>
+
+        <!-- View Switcher (List / Map) -->
+        <div class="view-switcher">
+          <button id="btnViewList" class="view-btn active" title="Vista de lista">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+            <span>Lista</span>
+          </button>
+          <button id="btnViewMap" class="view-btn" title="Vista de mapa">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+              <line x1="8" y1="2" x2="8" y2="18"></line>
+              <line x1="16" y1="6" x2="16" y2="22"></line>
+            </svg>
+            <span>Mapa</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Summary Ribbon -->
+    <section class="stats-ribbon">
+      <div class="stat-card">
+        <div class="stat-title">Gasolineras encontradas</div>
+        <div class="stat-value" id="statCount">--</div>
+        <div class="stat-hint" id="statFilterDesc">con el combustible seleccionado</div>
+      </div>
+      <div class="stat-card stat-best">
+        <div class="stat-title">Precio Más Barato</div>
+        <div class="stat-value highlight-orange" id="statMinPrice">-- €/L</div>
+        <div class="stat-hint" id="statMinDiff">Ahorro frente a la media</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Precio Medio</div>
+        <div class="stat-value" id="statAvgPrice">-- €/L</div>
+        <div class="stat-hint">Promedio en la selección actual</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Precio Más Alto</div>
+        <div class="stat-value" id="statMaxPrice">-- €/L</div>
+        <div class="stat-hint">Diferencia máxima</div>
+      </div>
+    </section>
+
+    <!-- View: Map Container -->
+    <section id="mapViewContainer" class="map-container" style="display: none;">
+      <!-- Map Top Toolbar (Igual que en zbe-map) -->
+      <div class="map-top-bar">
+        <div class="map-bar-left">
+          <span class="map-title-tag">MAPA ESPAÑA</span>
+          <span class="map-count-badge" id="mapCountBadge">0 gasolineras</span>
+        </div>
+
+        <div class="map-bar-controls">
+          <!-- Quick Region Buttons -->
+          <div class="map-quick-regions">
+            <button type="button" id="btnMapPeninsula" class="map-tool-btn" title="Centrar mapa en la Península">
+              <span>Península</span>
+            </button>
+            <button type="button" id="btnMapCanarias" class="map-tool-btn" title="Centrar mapa en Islas Canarias">
+              <span>Canarias</span>
+            </button>
+          </div>
+
+          <!-- Tile Layer Selector (Oscuro, CARTO, OSM, Satélite) -->
+          <div class="map-layer-selector" id="mapLayerSelector">
+            <button type="button" class="map-layer-btn active" data-layer="dark" title="Modo Oscuro (Esri Dark Canvas)">Oscuro</button>
+            <button type="button" class="map-layer-btn" data-layer="carto" title="CARTO Positron">CARTO</button>
+            <button type="button" class="map-layer-btn" data-layer="osm" title="OpenStreetMap">OSM</button>
+            <button type="button" class="map-layer-btn" data-layer="sat" title="Vista Satélite (Esri World Imagery)">Satélite</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="map"></div>
+
+      <div class="map-overlay-info">
+        <span>Haz clic en un marcador para ver precios de combustible y ruta en Google Maps.</span>
+      </div>
+    </section>
+
+    <!-- View: Cards Grid -->
+    <section id="listViewContainer" class="stations-section">
+      <!-- Loading indicator -->
+      <div id="loadingIndicator" class="loading-box" style="display:none;">
+        <div class="spinner"></div>
+        <p>Cargando precios actualizados...</p>
+      </div>
+
+      <!-- No results message -->
+      <div id="emptyState" class="empty-state" style="display:none;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+        <h3>No se encontraron gasolineras</h3>
+        <p>Prueba a cambiar el filtro de provincia, ampliar el radio de búsqueda o el tipo de combustible.</p>
+        <button id="btnResetFilters" class="btn-orange-outline">Restablecer filtros</button>
+      </div>
+
+      <!-- Cards Grid -->
+      <div id="stationsGrid" class="stations-grid"></div>
+
+      <!-- Pagination / Load More -->
+      <div id="paginationContainer" class="pagination-container" style="display:none;">
+        <button id="btnLoadMore" class="btn-load-more">
+          <span>Cargar más gasolineras</span>
+          <span class="count-tag" id="loadMoreCount"></span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <p><strong>Gasolineras España</strong> &bull; Datos abiertos facilitados por el <strong>Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO)</strong>.</p>
+        <p class="footer-note">Actualización automática programada cada 30 minutos.</p>
+      </div>
+      <div class="footer-right">
+        <span class="theme-pill">DISEÑO NEGRO &amp; NARANJA</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Leaflet JS for Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- App JS -->
+  <script src="app.js"></script>
+</body>
+</html>
