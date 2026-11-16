@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --bg-main: #0c0d10;
+    --bg-header: #08090b;
+    --bg-card: #15171d;
+    --bg-card-hover: #1c1f27;
+    --bg-input: #121418;
+    --bg-badge: #1f222b;
+    --bg-pricing-box: #0d0f12;
+    --bg-logo-pill: #ffffff;
+
+    --orange-primary: #ff6600;
+    --orange-hover: #ff7d24;
+    --orange-light: #ffa15c;
+    --orange-dark: #cc5200;
+    --orange-glow: rgba(255, 102, 0, 0.25);
+    --orange-subtle: rgba(255, 102, 0, 0.10);
+    --orange-border: rgba(255, 102, 0, 0.35);
+
+    --text-main: #f5f6f8;
+    --text-muted: #9aa0a6;
+    --text-dim: #686f78;
+
+    --border-color: #242833;
+    --border-subtle: #1c202a;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+  }
+
+  [data-theme="light"],
+  .light {
+    --bg-main: #f4f5f8;
+    --bg-header: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #fafafa;
+    --bg-input: #f8f9fb;
+    --bg-badge: #f0f2f5;
+    --bg-pricing-box: #f8f9fb;
+    --bg-logo-pill: #ffffff;
+
+    --orange-primary: #ff6600;
+    --orange-hover: #e55c00;
+    --orange-light: #ff8533;
+    --orange-dark: #cc5200;
+    --orange-glow: rgba(255, 102, 0, 0.2);
+    --orange-subtle: rgba(255, 102, 0, 0.08);
+    --orange-border: rgba(255, 102, 0, 0.4);
+
+    --text-main: #111827;
+    --text-muted: #4b5563;
+    --text-dim: #6b7280;
+
+    --border-color: #e5e7eb;
+    --border-subtle: #f0f2f5;
+  }
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Leaflet Container Overrides */
+.leaflet-container {
+  font-family: inherit !important;
+  background-color: #111111 !important;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+.custom-station-pin {
+  background-color: #000;
+  border: 2px solid var(--orange-primary);
+  color: var(--orange-primary);
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 3px 6px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.custom-station-pin:hover {
+  transform: scale(1.15);
+  background-color: var(--orange-primary);
+  color: #000;
+  z-index: 1000 !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--orange-primary) !important;
+  border-radius: 10px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+.leaflet-popup-tip {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--orange-primary) !important;
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 8px var(--orange-primary); }
+  50% { opacity: 0.5; transform: scale(0.9); box-shadow: 0 0 2px var(--orange-primary); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite ease-in-out;
+}

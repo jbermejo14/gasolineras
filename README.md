@@ -1,45 +1,116 @@
-# ⛽ Precios Gasolineras España (MITECO)
+# ⛽ Gasolineras España — SEO Programático con Next.js y MITECO
 
-Aplicación web moderna y minimalista con diseño en **negro y naranja** que consume la API pública oficial del **Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO)**, mostrando los precios en tiempo real de más de 11.500 estaciones de servicio en toda España y auto-actualizándose cada **30 minutos**.
+Aplicación web de **SEO programático** construida con **Next.js (App Router)**, **React 19** y **Tailwind CSS v4**, que consume en tiempo real los datos públicos oficiales del **Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO)**.
 
----
-
-## 🚀 Características
-
-- ⚡ **Auto-actualización cada 30 minutos**: Temporizador en vivo visible en la cabecera que sincroniza los precios automáticamente desde la API de MITECO en segundo plano, con opción de actualización manual forzada.
-- 🎨 **Diseño en Negro y Naranja**: Interfaz limpia, minimalista, de alto contraste (fondo oscuro profundo con acentos y distintivos en naranja brillante).
-- 🏷️ **Selector de Combustibles**:
-  - Gasolina 95 E5
-  - Diésel / Gasóleo A
-  - Gasolina 98 E5
-  - Diésel Plus / Premium
-  - Autogás GLP
-  - Gas Natural (GNC)
-- 🔍 **Búsqueda y Filtros Avanzados**:
-  - Filtro por Provincia (las 52 provincias de España).
-  - Búsqueda por texto (marca como Repsol, Cepsa, Plenoil, BP, calle, localidad o código postal).
-  - Ordenación: Más baratas primero, más caras, más cercanas o alfabético.
-- 📍 **Geolocalización ("Cerca de mí")**: Localiza estaciones con GPS y permite definir radio de búsqueda (5 km, 15 km, 30 km o 50 km).
-- 🗺️ **Vista Dual (Lista y Mapa)**:
-  - **Modo Lista**: Tarjetas con precios destacados, distintivo "Más barata", horarios y enlace directo a Google Maps ("Cómo llegar").
-  - **Modo Mapa**: Mapa interactivo Leaflet con tema oscuro y pines naranja con el precio visible directamente.
-- 📊 **Panel de Estadísticas**: Muestra precio mínimo, promedio y máximo para el filtro actual.
+Genera páginas indexables en el servidor para **52 provincias**, **~3.250 municipios** con gasolineras y más de **11.500 fichas de estaciones de servicio**, todas revalidadas cada **30 minutos**.
 
 ---
 
-## 🛠️ Instalación y Uso
+## 🚀 Arquitectura y Características
 
-1. **Instalar dependencias**:
-   ```bash
-   npm install
-   ```
+1. **SEO Programático Completo**:
+   - `/`: Buscador interactivo nacional, mapa y cinta de estadísticas nacionales (mínimo, promedio, máximo y ahorro de depósito de 50L).
+   - `/provincia/[provincia]`: Las más baratas por combustible, medias provinciales vs nacionales y directorio de municipios.
+   - `/provincia/[provincia]/[municipio]`: Gasolineras más baratas hoy en el municipio, tabla ordenada por precio legible sin JavaScript, comparativa frente a la provincia, mapa municipal y municipios cercanos.
+   - `/gasolinera/[id]-[slug]`: Ficha técnica de la estación con todos los carburantes disponibles, comparativa de ahorro, horario y mapa "Cómo llegar" con GPS.
+   - `404`: Devuelve `notFound()` estricto para cualquier slug inexistente (nunca páginas genéricas).
 
-2. **Iniciar la aplicación**:
-   ```bash
-   npm start
-   ```
+2. **Módulo Central de Datos (`lib/miteco.ts`)**:
+   - Descarga oficial de estaciones terrestres y listados oficiales de provincias y municipios de MITECO.
+   - Validación y normalización estricta:
+     - Descarta estaciones sin `IDEESS` o con coordenadas fuera del territorio de España.
+     - Valida precios únicamente en el rango realista de **[0,50 €/l - 3,50 €/l]**.
+     - Utiliza la fecha oficial devuelta por MITECO como fecha de actualización visible.
+     - Sistema de fallback: si la API externa falla temporalmente, sirve los últimos datos buenos en caché sin sustituirlos por datos ficticios.
 
-3. Abrir en el navegador:
-   ```
-   http://localhost:3005
-   ```
+3. **SEO On-Page y Datos Estructurados**:
+   - `title`, `description`, canonical absoluto y Open Graph únicos por página generados en el servidor.
+   - Microdatos JSON-LD con Schema.org: `BreadcrumbList` en todas las páginas y `GasStation` con `UnitPriceSpecification` en las fichas de estaciones.
+   - `sitemap.xml` dinámico autogenerado con más de 14.800 URLs indexables.
+   - `robots.txt` configurado.
+   - Dominio configurable mediante variable de entorno `NEXT_PUBLIC_SITE_URL` (sin URLs fijas en el código).
+
+4. **Seguridad**:
+   - Eliminado el refresco público sin autenticación y CORS abierto.
+   - Endpoint de revalidación forzada `POST /api/refresh` protegido mediante token Bearer (`REFRESH_SECRET`).
+
+5. **Rendimiento y Modo Oscuro/Claro**:
+   - Logos corporativos optimizados en formato **WebP** servidos con `next/image` (~100 KB en total frente a 440 KB originales).
+   - Carga dinámica del mapa Leaflet (`ssr: false`) en componentes cliente independientes.
+   - Soporte nativo de Modo Oscuro y Modo Claro con paleta Negro y Naranja persistente en `localStorage`.
+
+---
+
+## 🛠️ Instalación y Requisitos
+
+- **Node.js**: v20 o v22+
+- **npm**: 10+
+
+```bash
+# Instalar dependencias exactas
+npm install
+```
+
+---
+
+## ⚙️ Variables de Entorno
+
+Copia el archivo `.env.example` a `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+Configura las variables según tu entorno:
+
+```env
+# Dominio base del sitio (sin barra final)
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# Secreto para autorizar la recarga manual mediante POST /api/refresh
+REFRESH_SECRET=tu-clave-secreta-para-recarga-manual
+```
+
+---
+
+## 🧪 Pruebas Unitarias Sin Red
+
+Ejecuta el conjunto de pruebas unitarias basadas en un fixture real reducido de MITECO (`tests/miteco.test.js`):
+
+```bash
+npm test
+```
+
+Pruebas cubiertas:
+- Normalización y validación de coordenadas y descarte de registros inválidos.
+- Validación de rango de precios [0,50 - 3,50 €/l].
+- Generación de slugs limpios sin tildes ni caracteres especiales.
+- Cálculo de medias y mínimos municipales y provinciales.
+- Comprobación de 404 para slugs no registrados.
+- Simulación de generación del sitemap.
+
+---
+
+## 🏗️ Compilación y Ejecución
+
+### Desarrollo
+```bash
+npm run dev
+```
+
+### Producción
+```bash
+npm run build
+npm start
+```
+
+---
+
+## 🔒 Refresco Manual Forzado (Protegido)
+
+Para forzar la actualización inmediata de la caché de MITECO sin esperar a la revalidación automática de 30 minutos:
+
+```bash
+curl -X POST http://localhost:3000/api/refresh \
+  -H "Authorization: Bearer tu-clave-secreta-para-recarga-manual"
+```

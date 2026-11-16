@@ -1,0 +1,122 @@
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Gasolinera, formatPrice, FUEL_SHORT_LABELS, FuelType } from '@/lib/miteco';
+import { getStationBrand } from '@/lib/brands';
+import { Clock, MapPin, Navigation } from 'lucide-react';
+
+interface StationCardProps {
+  station: Gasolinera;
+  selectedFuel?: FuelType;
+  isCheapest?: boolean;
+}
+
+export function StationCard({ station, selectedFuel = 'gasolina95', isCheapest = false }: StationCardProps) {
+  const brand = getStationBrand(station.rotulo);
+  const currentPrice = station.precios[selectedFuel];
+  const fichaUrl = `/gasolinera/${station.id}-${station.slug}`;
+  const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lon}`;
+
+  // Otros precios secundarios
+  const secondaryFuels = (Object.keys(station.precios) as FuelType[])
+    .filter((f) => f !== selectedFuel && station.precios[f] !== null)
+    .slice(0, 3);
+
+  return (
+    <article
+      className={`rounded-xl border p-4 flex flex-col justify-between gap-3 transition-all duration-200 bg-[var(--bg-card)] ${
+        isCheapest
+          ? 'border-[var(--orange-primary)] shadow-md shadow-[var(--orange-glow)]'
+          : 'border-[var(--border-color)] hover:border-[var(--orange-border)] hover:bg-[var(--bg-card-hover)]'
+      }`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        {brand ? (
+          <div className="inline-flex items-center gap-2 bg-white border border-[var(--border-color)] px-2.5 py-1 rounded-md shadow-xs">
+            <Image
+              src={brand.logo}
+              alt={brand.name}
+              width={40}
+              height={20}
+              className="h-5 w-auto object-contain"
+            />
+            <span className="text-xs font-bold text-neutral-900 uppercase tracking-tight">
+              {station.rotulo}
+            </span>
+          </div>
+        ) : (
+          <span className="px-2.5 py-1 rounded bg-[var(--bg-input)] border border-[var(--orange-border)] text-[var(--orange-primary)] text-xs font-bold uppercase tracking-tight">
+            {station.rotulo}
+          </span>
+        )}
+
+        {isCheapest && (
+          <span className="px-2 py-0.5 rounded bg-[var(--orange-primary)] text-black text-[10px] font-extrabold uppercase">
+            Más barata
+          </span>
+        )}
+      </div>
+
+      <div>
+        <h3 className="font-bold text-base text-[var(--text-main)] leading-snug">
+          <Link href={fichaUrl} className="hover:text-[var(--orange-primary)] transition-colors">
+            {station.rotulo}
+          </Link>
+        </h3>
+        <p className="text-xs text-[var(--text-muted)] mt-0.5 flex items-start gap-1">
+          <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0 text-[var(--text-dim)]" />
+          <span>
+            {station.direccion}, {station.municipio} ({station.provincia})
+          </span>
+        </p>
+        <p className="text-[11px] text-[var(--text-dim)] mt-1 flex items-center gap-1">
+          <Clock className="w-3 h-3 shrink-0" />
+          <span>{station.horario}</span>
+        </p>
+      </div>
+
+      {/* Bloque de precio principal y secundarios */}
+      <div className="rounded-lg bg-[var(--bg-pricing-box)] border border-[var(--border-color)] p-3 flex items-center justify-between gap-3">
+        <div>
+          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
+            {FUEL_SHORT_LABELS[selectedFuel]}
+          </span>
+          <span className="font-mono text-2xl font-extrabold text-[var(--orange-primary)] leading-none">
+            {currentPrice !== null ? currentPrice.toFixed(3) : '--'}
+            <span className="text-xs font-normal text-[var(--text-muted)] ml-1">€/l</span>
+          </span>
+        </div>
+
+        <div className="flex flex-wrap gap-1.5 justify-end">
+          {secondaryFuels.map((f) => (
+            <span
+              key={f}
+              className="text-[10px] px-2 py-1 rounded bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)]"
+            >
+              {FUEL_SHORT_LABELS[f]}: <strong className="text-[var(--text-main)] font-mono">{formatPrice(station.precios[f])}</strong>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 pt-1">
+        <Link
+          href={fichaUrl}
+          className="flex-1 text-center py-2 px-3 rounded-md bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] text-xs font-semibold text-[var(--text-main)] hover:text-[var(--orange-primary)] transition-colors"
+        >
+          Ver Ficha Completa
+        </Link>
+        <a
+          href={gmapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-[var(--orange-primary)] text-black text-xs font-bold hover:bg-[var(--orange-hover)] transition-colors"
+          title="Cómo llegar en Google Maps"
+        >
+          <Navigation className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Cómo llegar</span>
+        </a>
+      </div>
+    </article>
+  );
+}
