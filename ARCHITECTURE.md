@@ -659,3 +659,115 @@ El bucket R2 necesita acceso público (dominio propio o `r2.dev`) y CORS que per
 |---|---|---|
 | `config/titular.json` | Datos del titular para las páginas legales | Si falta, se usa `config/titular.example.json` y se muestran marcadores |
 | `NEXT_PUBLIC_ADSENSE_CLIENT` | Identificador de editor de AdSense (`ca-pub-` + 16 dígitos) | Vacío: sin AdSense, sin `ads.txt` y sin botón "Configurar cookies" |
+
+---
+
+# Parte 4 — Exportación estática diaria para ododex.com
+
+## E.1 Objetivo y alcance
+
+Publicar la web gratis en Cloudflare como ficheros estáticos bajo `https://ododex.com/es/gasolineras`, actualizada **una vez al día** a mano por el titular (doble clic en un acceso directo que compila y despliega; lo prepara `../ododex-sitio`).
+
+Qué cambia:
+
+- Ruta base `/es/gasolineras`.
+- `output: "export"`: todas las páginas se generan en el build, sin ISR ni servidor.
+- Los precios se descargan de MITECO **una sola vez por build**, a un fichero instantánea, y todas las páginas leen de él.
+- La API `/api/estaciones` pasa a ser el fichero estático `public/datos/estaciones.json`, generado en el mismo paso.
+- Desaparecen `/api/refresh`, `/api/status`, `ads.txt` y `robots.txt`. Los dos últimos los sirve la raíz de `ododex.com`, generados por `../ododex-sitio`.
+- Las páginas de gasolinera y de municipio se publican **solo como HTML**: `../ododex-sitio` borra sus ficheros `.txt` y `__next*`. Hay que hacerlo para no pasar de 20 000 ficheros por Worker en el plan gratuito; hoy son unas 11 535 gasolineras y 3 256 municipios. Por eso los enlaces hacia esas páginas son `<a>` normales, no `next/link`.
+
+Qué no cambia: cálculos, datos, diseño, textos legales, histórico (`npm run historico`) y el mapa.
+
+## E.2 Módulos
+
+### E1 — `src/lib/site.ts` (rutas)
+
+Se amplía con la misma interfaz que `../multas-dgt/src/lib/site.ts`:
+
+```ts
+export const SITE_NAME = 'Ododex';
+export const SECTION_NAME = 'Gasolineras España';
+/** Ruta bajo la que se publica la web dentro de ododex.com. Sin barra final. */
+export const BASE_PATH = '/es/gasolineras';
+/** Origen sin barra final: NEXT_PUBLIC_SITE_URL o http://localhost:3000. */
+export function getSiteUrl(): string;
+/** Origen + BASE_PATH + ruta. absoluteUrl('/') → 'https://ododex.com/es/gasolineras'. */
+export function absoluteUrl(path: string): string;
+/** BASE_PATH + ruta, para <img>, <a> sin next/link, fetch y scripts. */
+export function assetPath(path: string): string;
+/** true si la ruta interna (sin BASE_PATH) es de una página publicada solo como HTML:
+ *  '/gasolinera/<x>' o '/provincia/<p>/<m>'. */
+export function isHtmlOnlyRoute(path: string): boolean;
+```
+
+- `getSiteUrl` sale de `src/lib/miteco.ts`. Todas sus importaciones pasan a `@/lib/site`.
+- Todos los canonical, `og:url`, JSON-LD (`seo.ts`) y entradas del sitemap usan `absoluteUrl`. Ninguna URL absoluta se monta a mano con `${siteUrl}/...`.
+- `next.config.ts`:
+  - `basePath: '/es/gasolineras'`, con una constante duplicada y un comentario, como en multas;
+  - `output: 'export'`;
+  - `images: { unoptimized: true }`, porque la exportación no admite el optimizador. Se quita `formats`;
+  - se conserva la regla de Turbopack para Tailwind.
+
+### E2 — `src/components/InternalLink.tsx` (enlaces)
+
+```tsx
+/** Enlace interno. Si isHtmlOnlyRoute(href) es true, renderiza <a href={assetPath(href)}>.
+ *  Si no, renderiza next/link. Acepta className, children y aria-*. */
+export function InternalLink(props: { href: string; className?: string; children: React.ReactNode; 'aria-label'?: string }): JSX.Element;
+```
+
+- Todo enlace interno cuyo destino sea `/gasolinera/...` o `/provincia/<p>/<m>` usa `InternalLink`. Están en `page.tsx` de provincia y municipio, en `gasolinera/[slug]/page.tsx`, `StationCard`, `Breadcrumbs`, el HTML de los popups del mapa y los demás que se encuentren. En el HTML de Leaflet, que es una cadena, se usa `assetPath`.
+- Los demás enlaces internos pueden seguir con `next/link`.
+
+### E3 — Instantánea de MITECO (`src/lib/mitecoSnapshot.ts`, `scripts/preparar-datos.ts`)
+
+```ts
+/** Ruta del fichero instantánea: data/cache/miteco-snapshot.json. */
+export const MITECO_SNAPSHOT_FILE: string;
+/** Descarga EstacionesTerrestres y Listados/Provincias de MITECO y escribe en MITECO_SNAPSHOT_FILE
+ *  { descargado: ISO, estaciones: <JSON crudo>, provincias: <JSON crudo | null> }.
+ *  Lanza Error con estado HTTP y URL si la descarga de estaciones falla. */
+export async function downloadMitecoSnapshot(file?: string): Promise<void>;
+/** Lee la instantánea y la procesa con processRawMitecoData. Lanza Error si falta el fichero,
+ *  con el aviso "ejecuta npm run preparar-datos". */
+export function loadMitecoSnapshot(file?: string): MitecoSnapshot;
+```
+
+- `getMitecoData()` deja de descargar. Llama a `loadMitecoSnapshot()` una vez por proceso y guarda el resultado en memoria. Se eliminan `forceRefresh`, el TTL y el fallback de red. Su firma pasa a `getMitecoData(): Promise<MitecoSnapshot>`; los llamadores no cambian.
+- `scripts/preparar-datos.ts`, en este orden:
+  1. descarga la instantánea;
+  2. carga la instantánea y escribe `public/datos/estaciones.json` con `buildEstacionesPayload` (el mismo contenido que daba la API);
+  3. muestra un resumen con la fecha MITECO, el número de estaciones y el tamaño del JSON.
+
+  Termina con código 1 y el error si algo falla.
+- `package.json`:
+  - `"preparar-datos": "node --experimental-strip-types --no-warnings scripts/preparar-datos.ts"`;
+  - `"build": "npm run preparar-datos && next build"`.
+- `.gitignore`: `data/cache/miteco-snapshot.json` y `public/datos/`.
+- `GasFinderLoader.ts`: `STATIONS_ENDPOINT = assetPath('/datos/estaciones.json')`.
+- `StationHistory.tsx`: la base por defecto del histórico es `assetPath('/historico-estaciones')`. Si `NEXT_PUBLIC_HISTORICO_BASE_URL` tiene valor, se usa ese.
+
+### E4 — Páginas estáticas
+
+- Se quitan todos los `export const revalidate`.
+- Las rutas dinámicas declaran `dynamicParams = false` y `generateStaticParams()` a partir de `getMitecoData()`:
+  - `gasolinera/[slug]`: todas las estaciones, con el slug `${id}-${slug}` que usan los enlaces actuales;
+  - `provincia/[provincia]`;
+  - `provincia/[provincia]/[municipio]`.
+- `sitemap.ts`: `dynamic = 'force-static'`, URLs con `absoluteUrl`, sin `revalidate`. Incluye las mismas páginas que hoy.
+- Se borran `src/app/api/`, `src/app/ads.txt/` y `src/app/robots.ts`. Lo hace la sesión principal con `git rm` cuando ya nada los use.
+- La fecha de los precios ya se muestra en la cabecera (`fechaMiteco`). Se mantiene.
+
+## E.3 Criterios de aceptación
+
+- `npm test` pasa: las 151 pruebas actuales, adaptadas si dependían de lo eliminado, más estas nuevas:
+  - `tests/site.test.ts`: `absoluteUrl`, `assetPath`, `isHtmlOnlyRoute` (gasolinera sí; municipio sí; provincia no; histórico no; home no) y que `next.config.ts` tiene el mismo `basePath` y `output: 'export'`.
+  - `tests/mitecoSnapshot.test.ts`: `loadMitecoSnapshot` con una instantánea de `tests/fixtures`, y el error si falta el fichero. Sin red.
+  - `tests/links.test.ts`: ningún `.tsx` de `src/` contiene `<Link` con `href` que empiece por `` `/gasolinera/ `` o `` `/provincia/${…}/${…}` ``. Comprobación por expresión regular sobre el código.
+- `npx tsc --noEmit` pasa y `npm run lint` termina sin errores nuevos.
+- `npm run build` termina:
+  - genera `out/` con `index.html`, `404.html`, `sitemap.xml` y `datos/estaciones.json`;
+  - crea una página por gasolinera, provincia y municipio;
+  - el `out/` tiene menos de 70 000 ficheros, que `../ododex-sitio` reducirá a menos de 20 000.
+- En pantalla (sesión principal, servido por `../ododex-sitio`): la home con el mapa y "Cerca de mí", una provincia, un municipio, una ficha con histórico y la navegación entre ellas.
