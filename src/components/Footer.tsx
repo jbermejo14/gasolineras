@@ -24,6 +24,10 @@ export function Footer({ fechaMiteco }: FooterProps) {
             Inicio
           </Link>
           <span className="text-[var(--border-color)]">&bull;</span>
+          <Link href="/historico" className="inline-flex items-center min-h-10 hover:text-[var(--orange-primary)] transition-colors">
+            Histórico de precios
+          </Link>
+          <span className="text-[var(--border-color)]">&bull;</span>
           <span className="px-2.5 py-1 rounded bg-[var(--bg-card)] border border-[var(--orange-border)] text-[var(--orange-primary)] font-bold text-[11px]">
             SEO PROGRAMÁTICO
           </span>

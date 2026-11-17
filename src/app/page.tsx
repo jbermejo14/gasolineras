@@ -97,6 +97,14 @@ export default async function HomePage() {
               <div className="text-xs text-[var(--text-dim)] mt-1">frente al promedio nacional</div>
             </div>
           </div>
+
+          <Link
+            href="/historico"
+            className="mt-4 inline-flex items-center gap-1.5 min-h-10 text-sm font-bold text-[var(--orange-primary)] hover:underline"
+          >
+            <TrendingDown className="w-4 h-4" />
+            <span>Ver evolución histórica del precio</span>
+          </Link>
         </div>
 
         {/* Buscador Interactivo y Mapa Nacional */}

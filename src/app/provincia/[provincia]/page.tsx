@@ -13,6 +13,7 @@ import {
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { StationCard } from '@/components/StationCard';
 import { getBreadcrumbSchema } from '@/lib/seo';
+import { getAreasByKind } from '@/lib/historico';
 import { Fuel, TrendingDown, MapPin, Building2 } from 'lucide-react';
 
 export const revalidate = 1800;
@@ -107,6 +108,8 @@ export default async function ProvinciaPage({ params }: PageProps) {
     .sort((a, b) => (a.precios.diesel as number) - (b.precios.diesel as number))
     .slice(0, 6);
 
+  const hasHistory = getAreasByKind('provincia').some((area) => area.slug === provSlug);
+
   const breadcrumbs = [
     { label: provObj.provincia, href: `/provincia/${provSlug}` },
   ];
@@ -180,6 +183,16 @@ export default async function ProvinciaPage({ params }: PageProps) {
               <div className="text-xs text-[var(--text-dim)] mt-1">frente a la media de {provObj.provincia}</div>
             </div>
           </div>
+
+          {hasHistory && (
+            <Link
+              href={`/historico/provincia/${provSlug}`}
+              className="mt-4 inline-flex items-center gap-1.5 min-h-10 text-sm font-bold text-[var(--orange-primary)] hover:underline"
+            >
+              <TrendingDown className="w-4 h-4" />
+              <span>Evolución histórica en {provObj.provincia}</span>
+            </Link>
+          )}
         </div>
 
         {/* Top Más Baratas Gasolina 95 */}
