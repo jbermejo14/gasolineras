@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { EstacionLigera, EstacionesPayload } from '@/lib/stationPayload';
+import { assetPath } from '@/lib/site';
 
-const STATIONS_ENDPOINT = '/api/estaciones';
+const STATIONS_ENDPOINT = assetPath('/datos/estaciones.json');
 const GENERIC_ERROR_MESSAGE =
   'No se pudieron cargar las gasolineras. Comprueba tu conexión e inténtalo de nuevo.';
 

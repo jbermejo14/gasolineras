@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { FuelType, FUEL_LABELS } from '@/lib/miteco';
 import { BRAND_CONFIG } from '@/lib/brands';
+import { assetPath } from '@/lib/site';
 
 const FUEL_OPTIONS: FuelType[] = ['gasolina95', 'diesel', 'gasolina98', 'dieselPremium', 'glp', 'gnc'];
 
@@ -60,7 +61,7 @@ export function GasFinderFuelBrand({ fuel, brand, onFuelChange, onBrandChange }:
                   : 'bg-white border border-[var(--border-color)] text-neutral-900 hover:border-[var(--orange-border)]'
               }`}
             >
-              <Image src={item.logo} alt={item.name} width={36} height={18} className="h-4 w-auto object-contain" />
+              <Image src={assetPath(item.logo)} alt={item.name} width={36} height={18} className="h-4 w-auto object-contain" />
               <span className="text-[11px] font-bold">{item.name}</span>
             </button>
           ))}

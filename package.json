@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run preparar-datos && next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "test": "node --experimental-strip-types --no-warnings --test tests/*.test.js tests/*.test.ts",
-    "historico": "node --experimental-strip-types --no-warnings scripts/historico.ts"
+    "historico": "node --experimental-strip-types --no-warnings scripts/historico.ts",
+    "preparar-datos": "node --experimental-strip-types --no-warnings scripts/preparar-datos.ts"
   },
   "dependencies": {
     "@types/leaflet": "^1.9.22",
@@ -19,7 +20,7 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@tailwindcss/turbopack": "4.3.3",
+    "@tailwindcss/postcss": "4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -28,5 +29,8 @@
     "eslint-config-next": "16.4.6",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-wasm32-wasi": "4.3.3"
   }
 }

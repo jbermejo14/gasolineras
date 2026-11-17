@@ -3,12 +3,10 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import 'leaflet/dist/leaflet.css';
 import './globals.css';
 import { AdSenseScript } from '@/components/AdSenseScript';
-import { SITE_NAME } from '@/lib/site';
+import { SITE_NAME, absoluteUrl, getSiteUrl } from '@/lib/site';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { getMitecoData, getSiteUrl } from '@/lib/miteco';
-
-export const revalidate = 1800; // 30 minutos ISR
+import { getMitecoData } from '@/lib/mitecoSnapshot';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -59,25 +57,25 @@ export const viewport: Viewport = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const siteUrl = getSiteUrl();
+  const homeUrl = absoluteUrl('/');
 
   return {
-    metadataBase: new URL(siteUrl),
+    metadataBase: new URL(getSiteUrl()),
     title: {
       default: 'Precio de la gasolina hoy en España: gasolineras más baratas | Ododex',
       template: `%s | ${SITE_NAME}`,
     },
     description:
-      'Consulta el precio de la gasolina 95, diésel y GLP en más de 11.500 gasolineras de España con datos oficiales del Ministerio para la Transición Ecológica actualizados cada 30 minutos.',
+      'Consulta el precio de la gasolina 95, diésel y GLP en más de 11.500 gasolineras de España con datos oficiales del Ministerio para la Transición Ecológica actualizados cada día.',
     alternates: {
-      canonical: siteUrl,
+      canonical: homeUrl,
     },
     openGraph: {
       type: 'website',
       locale: 'es_ES',
-      url: siteUrl,
+      url: homeUrl,
       siteName: SITE_NAME,
-      title: 'Precios de Gasolineras en España Hoy en Tiempo Real',
+      title: 'Precios de Gasolineras en España Hoy',
       description:
         'Encuentra las gasolineras más baratas por provincia, municipio y código postal con datos oficiales de MITECO.',
     },
@@ -93,13 +91,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  let fechaMiteco = '';
-  try {
-    const data = await getMitecoData();
-    fechaMiteco = data.fechaMiteco;
-  } catch (e) {
-    // ignore
-  }
+  const { fechaMiteco } = await getMitecoData();
 
   return (
     <html lang="es" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>

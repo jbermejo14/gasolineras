@@ -21,6 +21,10 @@ yarn-error.log*
 data/historico/cache/
 public/historico-estaciones/
 
+# Instantánea diaria de MITECO y JSON de estaciones (los genera npm run preparar-datos)
+data/cache/miteco-snapshot.json
+public/datos/
+
 # OS
 .DS_Store
 Thumbs.db

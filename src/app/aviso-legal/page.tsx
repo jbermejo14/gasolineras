@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { LegalPage } from '@/components/LegalPage';
 import { getTitular, valorOPendiente, type Titular } from '@/lib/legal';
-import { getSiteUrl } from '@/lib/miteco';
-import { SITE_NAME } from '@/lib/site';
+import { SITE_NAME, absoluteUrl } from '@/lib/site';
 
 const PATH = '/aviso-legal';
 const URL_MITECO = 'https://www.miteco.gob.es';
@@ -11,7 +10,7 @@ export const metadata: Metadata = {
   title: 'Aviso legal',
   description: `Aviso legal e información del titular de ${SITE_NAME} conforme al artículo 10 de la LSSI.`,
   robots: { index: false, follow: true },
-  alternates: { canonical: `${getSiteUrl()}${PATH}` }
+  alternates: { canonical: absoluteUrl(PATH) }
 };
 
 export default function AvisoLegalPage() {

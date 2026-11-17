@@ -3,8 +3,7 @@ import type { AreaHistory, AreaHistoryFile, AreaKind, HistoryFuel } from './hist
 import { yearOfIso } from './historicoFormat';
 import { formatIsoDateEs, formatMilliNumber, formatSignedPercent, summarizeSeries } from './historicoStats';
 import { loadAreaHistory } from './historico';
-import { getSiteUrl } from './miteco';
-import { SECTION_NAME } from './site';
+import { SECTION_NAME, absoluteUrl } from './site';
 
 const HISTORICO_BASE_PATH = '/historico';
 const HISTORICO_NOT_FOUND_TITLE = 'Histórico de precios no encontrado';
@@ -74,7 +73,7 @@ export function buildHistoricoMetadata(kind: AreaKind, slug: string): Metadata {
   }
   const title = buildHistoricoTitle(kind, file.area.name, file.weeks);
   const description = buildHistoricoDescription(file.area, file.weeks);
-  const canonical = `${getSiteUrl()}${buildHistoricoPath(kind, slug)}`;
+  const canonical = absoluteUrl(buildHistoricoPath(kind, slug));
   return {
     title,
     description,

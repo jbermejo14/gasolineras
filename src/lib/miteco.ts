@@ -85,7 +85,6 @@ export interface ResumenProvincia {
 
 export interface MitecoSnapshot {
   fechaMiteco: string; // Fecha textual que devuelve la API de MITECO (ej: "16/11/2026 13:06:34")
-  timestampFetch: number; // Momento de la descarga
   estaciones: Gasolinera[];
   estacionesById: Map<string, Gasolinera>;
   provinciasMap: Map<string, { idProvincia: string; provincia: string; provinciaSlug: string; estaciones: Gasolinera[] }>;
@@ -121,8 +120,6 @@ export const MITECO_URL_ESTACIONES =
   'https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/';
 export const MITECO_URL_PROVINCIAS =
   'https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/Listados/Provincias/';
-export const MITECO_URL_MUNICIPIOS =
-  'https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/Listados/Municipios/';
 
 /**
  * Función canónica para generar slugs estables: minúsculas, sin tildes, sin caracteres raros, guiones limpios.
@@ -401,84 +398,12 @@ export function processRawMitecoData(
 
   return {
     fechaMiteco,
-    timestampFetch: Date.now(),
     estaciones,
     estacionesById,
     provinciasMap,
     municipiosMap,
     statsNacionales,
   };
-}
-
-// Caché en memoria para servidor/revalidación ISR
-let cachedSnapshot: MitecoSnapshot | null = null;
-let lastFetchPromise: Promise<MitecoSnapshot> | null = null;
-const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutos
-
-/**
- * Obtiene los datos oficiales de MITECO con caché de 30 minutos.
- * Si la llamada a MITECO falla, devuelve los últimos datos válidos (fallback).
- * Nunca inventa datos si falla la llamada inicial.
- */
-export async function getMitecoData(forceRefresh = false): Promise<MitecoSnapshot> {
-  const now = Date.now();
-
-  if (!forceRefresh && cachedSnapshot && now - cachedSnapshot.timestampFetch < CACHE_TTL_MS) {
-    return cachedSnapshot;
-  }
-
-  if (lastFetchPromise && !forceRefresh) {
-    return lastFetchPromise;
-  }
-
-  lastFetchPromise = (async () => {
-    try {
-      console.log(`[MITECO] Descargando precios de estaciones terrestres...`);
-      const [estacionesRes, provRes] = await Promise.all([
-        fetch(MITECO_URL_ESTACIONES, {
-          headers: { Accept: 'application/json', 'User-Agent': 'GasolinerasSEO/1.0' },
-          next: { revalidate: 1800 },
-        }),
-        fetch(MITECO_URL_PROVINCIAS, {
-          headers: { Accept: 'application/json', 'User-Agent': 'GasolinerasSEO/1.0' },
-          next: { revalidate: 86400 },
-        }).catch(() => null),
-      ]);
-
-      if (!estacionesRes.ok) {
-        throw new Error(`Error HTTP de MITECO: ${estacionesRes.status} ${estacionesRes.statusText}`);
-      }
-
-      const rawData = await estacionesRes.json();
-      let provinciasOficiales: any[] | undefined = undefined;
-      if (provRes && provRes.ok) {
-        provinciasOficiales = await provRes.json().catch(() => undefined);
-      }
-
-      const snapshot = processRawMitecoData(rawData, provinciasOficiales);
-      cachedSnapshot = snapshot;
-      return snapshot;
-    } catch (err: any) {
-      console.error(`[MITECO ERROR] Fallo al consultar API:`, err?.message || err);
-      if (cachedSnapshot) {
-        console.warn(`[MITECO FALLBACK] Sirviendo datos previos en caché (${cachedSnapshot.fechaMiteco}).`);
-        return cachedSnapshot;
-      }
-      throw err;
-    } finally {
-      lastFetchPromise = null;
-    }
-  })();
-
-  return lastFetchPromise;
-}
-
-/**
- * Obtiene la URL canónica del sitio leyendo NEXT_PUBLIC_SITE_URL (sin barra final).
- */
-export function getSiteUrl(): string {
-  const url = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-  return url.replace(/\/+$/, '');
 }
 
 /**

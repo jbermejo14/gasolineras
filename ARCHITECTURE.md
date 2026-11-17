@@ -771,3 +771,15 @@ export function loadMitecoSnapshot(file?: string): MitecoSnapshot;
   - crea una página por gasolinera, provincia y municipio;
   - el `out/` tiene menos de 70 000 ficheros, que `../ododex-sitio` reducirá a menos de 20 000.
 - En pantalla (sesión principal, servido por `../ododex-sitio`): la home con el mapa y "Cerca de mí", una provincia, un municipio, una ficha con histórico y la navegación entre ellas.
+
+## E.4 Nota de implementación: compilación en Windows
+
+En el equipo del titular, una política de Control de Aplicaciones bloquea los binarios nativos de Tailwind (`@tailwindcss/oxide-win32-x64-msvc`) y de SWC. Turbopack no tiene alternativa WASM, así que se usa el mismo arreglo que `../multas-dgt`:
+
+- La regla `turbopack` de `next.config.ts` y `@tailwindcss/turbopack` se sustituyen por `postcss.config.mjs` y `postcss-tailwind-windows.cjs` (copiados de multas-dgt) más `@tailwindcss/postcss` 4.3.3.
+- `@tailwindcss/oxide-wasm32-wasi` 4.3.3 va en `optionalDependencies`. npm no lo instala solo porque declara `cpu: wasm32`; si falta, se copia de `../multas-dgt/node_modules/@tailwindcss/`.
+- `"build": "npm run preparar-datos && next build --webpack"`.
+
+Resultado medido el 17/11/2026:
+- El build genera 14 930 páginas en unos 4 minutos y 90 224 ficheros en `out/`.
+- `../ododex-sitio` lo reduce a 16 296 ficheros (unos 1 000 MB) en `dist-gasolineras/`.

@@ -1,5 +1,6 @@
 import type { FuelType } from '@/lib/miteco';
 import { getStationBrand } from '@/lib/brands';
+import { assetPath } from '@/lib/site';
 import type { EstacionLigera } from '@/lib/stationPayload';
 
 interface ClusterSizeTier {
@@ -78,7 +79,7 @@ export function buildPinIconSpec(station: EstacionLigera, price: number | null, 
   const brand = getStationBrand(station.rotulo);
   const highlightClass = isHighlight ? ' custom-station-pin--highlight' : '';
   const logo = brand
-    ? `<img class="custom-station-pin__logo" src="${escapeHtml(brand.logo)}" alt="" width="${PIN_LOGO_SIZE_PX}" height="${PIN_LOGO_SIZE_PX}">`
+    ? `<img class="custom-station-pin__logo" src="${escapeHtml(assetPath(brand.logo))}" alt="" width="${PIN_LOGO_SIZE_PX}" height="${PIN_LOGO_SIZE_PX}">`
     : '';
   const label = price === null ? '⛽' : `${formatPrice(price)}€`;
   return {
@@ -94,7 +95,7 @@ export function buildPinIconSpec(station: EstacionLigera, price: number | null, 
 /** HTML del popup de una estación; se genera solo al abrirlo. */
 export function buildStationPopupHtml(station: EstacionLigera, price: number | null): string {
   const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lon}`;
-  const fichaUrl = `/gasolinera/${encodeURIComponent(station.id)}-${encodeURIComponent(station.slug)}`;
+  const fichaUrl = assetPath(`/gasolinera/${encodeURIComponent(station.id)}-${encodeURIComponent(station.slug)}`);
   const priceText = price === null ? 'Consultar' : `${formatPrice(price)} €/l`;
   return `
     <div class="station-popup">

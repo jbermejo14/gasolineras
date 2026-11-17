@@ -1,25 +1,36 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import {
-  getMitecoData,
-  getSiteUrl,
   calcularTodasLasStats,
   calculateSavings50L,
   formatPrice,
   FUEL_LABELS,
   FuelType,
 } from '@/lib/miteco';
+import { getMitecoData } from '@/lib/mitecoSnapshot';
+import { absoluteUrl, assetPath } from '@/lib/site';
 import { getStationBrand } from '@/lib/brands';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
+import { InternalLink } from '@/components/InternalLink';
 import { ClientMapWrapper } from '@/components/ClientMapWrapper';
 import { StationHistory } from '@/components/StationHistory';
 import { getBreadcrumbSchema, getGasStationSchema } from '@/lib/seo';
 import { Clock, MapPin, Navigation, Fuel, ShieldCheck, ArrowLeft, LineChart } from 'lucide-react';
 
-export const revalidate = 1800;
+export const dynamicParams = false;
+
+/** Ruta interna de la ficha de una gasolinera: /gasolinera/<id>-<slug>. */
+function gasolineraStationPath(station: { id: string; slug: string }): string {
+  return `/gasolinera/${station.id}-${station.slug}`;
+}
+
+/** Una página por gasolinera de la instantánea de MITECO. */
+export async function generateStaticParams() {
+  const data = await getMitecoData();
+  return data.estaciones.map((station) => ({ slug: `${station.id}-${station.slug}` }));
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -40,8 +51,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: 'Gasolinera no encontrada', robots: { index: false, follow: false } };
   }
 
-  const siteUrl = getSiteUrl();
-  const canonical = `${siteUrl}/gasolinera/${station.id}-${station.slug}`;
+  const canonical = absoluteUrl(gasolineraStationPath(station));
 
   const pG95 = station.precios.gasolina95 ? formatPrice(station.precios.gasolina95) : null;
   const pDiesel = station.precios.diesel ? formatPrice(station.precios.diesel) : null;
@@ -83,7 +93,6 @@ export default async function GasolineraPage({ params }: PageProps) {
     notFound();
   }
 
-  const siteUrl = getSiteUrl();
   const brand = getStationBrand(station.rotulo);
   const munKey = `${station.provinciaSlug}:${station.municipioSlug}`;
   const munObj = data.municipiosMap.get(munKey);
@@ -111,14 +120,14 @@ export default async function GasolineraPage({ params }: PageProps) {
   const breadcrumbs = [
     { label: station.provincia, href: `/provincia/${station.provinciaSlug}` },
     { label: station.municipio, href: `/provincia/${station.provinciaSlug}/${station.municipioSlug}` },
-    { label: `${station.rotulo} (${station.id})`, href: `/gasolinera/${station.id}-${station.slug}` },
+    { label: `${station.rotulo} (${station.id})`, href: gasolineraStationPath(station) },
   ];
 
   const breadcrumbSchema = getBreadcrumbSchema([
-    { name: 'Inicio', url: siteUrl },
-    { name: station.provincia, url: `${siteUrl}/provincia/${station.provinciaSlug}` },
-    { name: station.municipio, url: `${siteUrl}/provincia/${station.provinciaSlug}/${station.municipioSlug}` },
-    { name: `${station.rotulo} (${station.id})`, url: `${siteUrl}/gasolinera/${station.id}-${station.slug}` },
+    { name: 'Inicio', url: absoluteUrl('/') },
+    { name: station.provincia, url: absoluteUrl(`/provincia/${station.provinciaSlug}`) },
+    { name: station.municipio, url: absoluteUrl(`/provincia/${station.provinciaSlug}/${station.municipioSlug}`) },
+    { name: `${station.rotulo} (${station.id})`, url: absoluteUrl(gasolineraStationPath(station)) },
   ]);
 
   const gasStationSchema = getGasStationSchema({
@@ -132,7 +141,7 @@ export default async function GasolineraPage({ params }: PageProps) {
     horario: station.horario,
     lat: station.lat,
     lon: station.lon,
-    url: `${siteUrl}/gasolinera/${station.id}-${station.slug}`,
+    url: absoluteUrl(gasolineraStationPath(station)),
     precios: station.precios as unknown as Record<string, number | null>,
   });
 
@@ -158,7 +167,7 @@ export default async function GasolineraPage({ params }: PageProps) {
                 {brand ? (
                   <div className="inline-flex items-center gap-2 bg-white border border-[var(--border-color)] px-3 py-1.5 rounded-md shadow-xs">
                     <Image
-                      src={brand.logo}
+                      src={assetPath(brand.logo)}
                       alt={brand.name}
                       width={48}
                       height={24}
@@ -213,13 +222,13 @@ export default async function GasolineraPage({ params }: PageProps) {
                 <Navigation className="w-4 h-4" />
                 <span>Cómo llegar (GPS)</span>
               </a>
-              <Link
+              <InternalLink
                 href={`/provincia/${station.provinciaSlug}/${station.municipioSlug}`}
                 className="flex items-center justify-center gap-1.5 min-h-11 px-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] text-xs font-bold text-[var(--text-main)] transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Ver todo {station.municipio}</span>
-              </Link>
+              </InternalLink>
             </div>
           </div>
 

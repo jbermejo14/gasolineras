@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import { InternalLink } from './InternalLink';
 import { ChevronRight } from 'lucide-react';
 
 export interface BreadcrumbItem {
@@ -12,9 +12,9 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
     <nav aria-label="Migas de pan" className="mb-4 min-w-0">
       <ol className="flex items-center gap-x-1.5 gap-y-0.5 text-xs text-[var(--text-muted)] flex-wrap">
         <li>
-          <Link href="/" className="inline-flex items-center min-h-10 hover:text-[var(--orange-primary)] transition-colors">
+          <InternalLink href="/" className="inline-flex items-center min-h-10 hover:text-[var(--orange-primary)] transition-colors">
             Inicio
-          </Link>
+          </InternalLink>
         </li>
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
@@ -29,9 +29,9 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
                     {item.label}
                   </span>
                 ) : (
-                  <Link href={item.href} className="inline-flex items-center min-h-10 break-words hover:text-[var(--orange-primary)] transition-colors">
+                  <InternalLink href={item.href} className="inline-flex items-center min-h-10 break-words hover:text-[var(--orange-primary)] transition-colors">
                     {item.label}
-                  </Link>
+                  </InternalLink>
                 )}
               </li>
             </React.Fragment>

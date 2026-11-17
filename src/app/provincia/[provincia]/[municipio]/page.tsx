@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
+import { InternalLink } from '@/components/InternalLink';
+import { getMitecoData } from '@/lib/mitecoSnapshot';
+import { absoluteUrl } from '@/lib/site';
 import dynamic from 'next/dynamic';
 import {
-  getMitecoData,
-  getSiteUrl,
   calcularTodasLasStats,
   calculateSavings50L,
   formatPrice,
@@ -16,7 +16,16 @@ import { ClientMapWrapper } from '@/components/ClientMapWrapper';
 import { getBreadcrumbSchema } from '@/lib/seo';
 import { Fuel, TrendingDown, MapPin, Building2, Navigation } from 'lucide-react';
 
-export const revalidate = 1800;
+export const dynamicParams = false;
+
+/** Una página por municipio con gasolineras en la instantánea de MITECO. */
+export async function generateStaticParams() {
+  const data = await getMitecoData();
+  return Array.from(data.municipiosMap.values(), (mun) => ({
+    provincia: mun.provinciaSlug,
+    municipio: mun.municipioSlug,
+  }));
+}
 
 interface PageProps {
   params: Promise<{ provincia: string; municipio: string }>;
@@ -35,8 +44,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const siteUrl = getSiteUrl();
-  const canonical = `${siteUrl}/provincia/${provSlug}/${munSlug}`;
+  const canonical = absoluteUrl(`/provincia/${provSlug}/${munSlug}`);
   const stats = calcularTodasLasStats(munObj.estaciones);
   const minG95 = stats.gasolina95.min;
   const minDiesel = stats.diesel.min;
@@ -105,16 +113,15 @@ export default async function MunicipioPage({ params }: PageProps) {
         .slice(0, 12)
     : [];
 
-  const siteUrl = getSiteUrl();
   const breadcrumbs = [
     { label: munObj.provincia, href: `/provincia/${provSlug}` },
     { label: munObj.municipio, href: `/provincia/${provSlug}/${munSlug}` },
   ];
 
   const breadcrumbSchema = getBreadcrumbSchema([
-    { name: 'Inicio', url: siteUrl },
-    { name: munObj.provincia, url: `${siteUrl}/provincia/${provSlug}` },
-    { name: munObj.municipio, url: `${siteUrl}/provincia/${provSlug}/${munSlug}` },
+    { name: 'Inicio', url: absoluteUrl('/') },
+    { name: munObj.provincia, url: absoluteUrl(`/provincia/${provSlug}`) },
+    { name: munObj.municipio, url: absoluteUrl(`/provincia/${provSlug}/${munSlug}`) },
   ]);
 
   return (
@@ -221,12 +228,12 @@ export default async function MunicipioPage({ params }: PageProps) {
                 {sortedStations.map((s, idx) => (
                   <tr key={s.id} className="hover:bg-[var(--bg-card-hover)] transition-colors">
                     <td className="py-2 px-2 sm:px-3">
-                      <Link
+                      <InternalLink
                         href={`/gasolinera/${s.id}-${s.slug}`}
                         className="font-bold text-[var(--text-main)] hover:text-[var(--orange-primary)] transition-colors block text-sm"
                       >
                         {s.rotulo}
-                      </Link>
+                      </InternalLink>
                       {idx === 0 && (
                         <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-[var(--on-accent-bg)] text-[var(--on-accent-text)] text-[9px] font-extrabold uppercase">
                           MÁS BARATA
@@ -247,12 +254,12 @@ export default async function MunicipioPage({ params }: PageProps) {
                     </td>
                     <td className="py-2 px-2 sm:px-3 text-center">
                       <div className="flex items-center justify-center gap-1.5">
-                        <Link
+                        <InternalLink
                           href={`/gasolinera/${s.id}-${s.slug}`}
                           className="inline-flex items-center min-h-10 px-3 rounded bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] text-[var(--text-main)] text-[11px] font-semibold transition-colors"
                         >
                           Ficha
-                        </Link>
+                        </InternalLink>
                         <a
                           href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`}
                           target="_blank"
@@ -305,13 +312,13 @@ export default async function MunicipioPage({ params }: PageProps) {
             </h2>
             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
               {nearbyMunicipios.map((nm) => (
-                <Link
+                <InternalLink
                   key={nm.slug}
                   href={`/provincia/${provSlug}/${nm.slug}`}
                   className="flex items-center min-h-10 min-w-0 p-2.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] hover:bg-[var(--bg-card-hover)] transition-all text-xs font-semibold text-[var(--text-main)] hover:text-[var(--orange-primary)]"
                 >
                   <span className="truncate">{nm.name}</span>
-                </Link>
+                </InternalLink>
               ))}
             </div>
           </div>

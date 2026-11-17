@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import { LegalPage } from '@/components/LegalPage';
 import { getTitular, valorOPendiente, type Titular } from '@/lib/legal';
 import { getAdSenseClient } from '@/lib/adsense';
-import { getSiteUrl } from '@/lib/miteco';
-import { SITE_NAME } from '@/lib/site';
+import { SITE_NAME, absoluteUrl } from '@/lib/site';
 
 const PATH = '/privacidad';
 const URL_AEPD = 'https://www.aepd.es';
@@ -12,7 +11,7 @@ export const metadata: Metadata = {
   title: 'Política de privacidad',
   description: `Cómo trata ${SITE_NAME} los datos personales conforme al RGPD.`,
   robots: { index: false, follow: true },
-  alternates: { canonical: `${getSiteUrl()}${PATH}` }
+  alternates: { canonical: absoluteUrl(PATH) }
 };
 
 export default function PrivacidadPage() {

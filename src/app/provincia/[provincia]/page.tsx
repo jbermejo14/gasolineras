@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { InternalLink } from '@/components/InternalLink';
+import { getMitecoData } from '@/lib/mitecoSnapshot';
+import { absoluteUrl } from '@/lib/site';
 import {
-  getMitecoData,
-  getSiteUrl,
   calcularTodasLasStats,
   calculateSavings50L,
   formatPrice,
@@ -16,7 +17,13 @@ import { getBreadcrumbSchema } from '@/lib/seo';
 import { getAreasByKind } from '@/lib/historico';
 import { Fuel, TrendingDown, MapPin, Building2 } from 'lucide-react';
 
-export const revalidate = 1800;
+export const dynamicParams = false;
+
+/** Una página por provincia con gasolineras en la instantánea de MITECO. */
+export async function generateStaticParams() {
+  const data = await getMitecoData();
+  return Array.from(data.provinciasMap.keys(), (provincia) => ({ provincia }));
+}
 
 interface PageProps {
   params: Promise<{ provincia: string }>;
@@ -34,14 +41,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const siteUrl = getSiteUrl();
-  const canonical = `${siteUrl}/provincia/${provincia}`;
+  const canonical = absoluteUrl(`/provincia/${provincia}`);
   const stats = calcularTodasLasStats(provObj.estaciones);
   const minG95 = stats.gasolina95.min;
   const minDiesel = stats.diesel.min;
 
   const title = `Gasolineras más baratas en ${provObj.provincia} hoy | Precios MITECO`;
-  const description = `Precios de combustible en ${provObj.provincia} hoy: ${provObj.estaciones.length} gasolineras comparadas en directo. Gasolina 95 desde ${formatPrice(minG95)} y diésel desde ${formatPrice(minDiesel)}. Ahorra repostando en tu provincia.`;
+  const description = `Precios de combustible en ${provObj.provincia} hoy: ${provObj.estaciones.length} gasolineras comparadas. Gasolina 95 desde ${formatPrice(minG95)} y diésel desde ${formatPrice(minDiesel)}. Ahorra repostando en tu provincia.`;
 
   return {
     title,
@@ -68,7 +74,6 @@ export default async function ProvinciaPage({ params }: PageProps) {
     notFound();
   }
 
-  const siteUrl = getSiteUrl();
   const statsProv = calcularTodasLasStats(provObj.estaciones);
   const natG95 = data.statsNacionales.gasolina95;
   const natDiesel = data.statsNacionales.diesel;
@@ -115,8 +120,8 @@ export default async function ProvinciaPage({ params }: PageProps) {
   ];
 
   const breadcrumbSchema = getBreadcrumbSchema([
-    { name: 'Inicio', url: siteUrl },
-    { name: provObj.provincia, url: `${siteUrl}/provincia/${provSlug}` },
+    { name: 'Inicio', url: absoluteUrl('/') },
+    { name: provObj.provincia, url: absoluteUrl(`/provincia/${provSlug}`) },
   ]);
 
   return (
@@ -244,7 +249,7 @@ export default async function ProvinciaPage({ params }: PageProps) {
 
           <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 pt-2">
             {municipiosList.map((m) => (
-              <Link
+              <InternalLink
                 key={m.slug}
                 href={`/provincia/${provSlug}/${m.slug}`}
                 className="min-h-12 min-w-0 p-2.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] hover:bg-[var(--bg-card-hover)] transition-all flex flex-col justify-center group"
@@ -255,7 +260,7 @@ export default async function ProvinciaPage({ params }: PageProps) {
                 <span className="text-[11px] text-[var(--text-dim)] font-mono mt-1">
                   {m.count} {m.count === 1 ? 'estación' : 'estaciones'}
                 </span>
-              </Link>
+              </InternalLink>
             ))}
           </div>
         </div>

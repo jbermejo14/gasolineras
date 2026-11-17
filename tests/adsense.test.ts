@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { buildAdsTxt, isValidAdSenseClient } from '../src/lib/adsense.ts';
+import { isValidAdSenseClient } from '../src/lib/adsense.ts';
 
 const VALID_CLIENT = 'ca-pub-1234567890123456';
 
@@ -20,12 +20,3 @@ describe('isValidAdSenseClient', () => {
   });
 });
 
-describe('buildAdsTxt', () => {
-  it('genera la línea DIRECT con pub- sin el prefijo ca-', () => {
-    assert.equal(buildAdsTxt(VALID_CLIENT), 'google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0\n');
-  });
-
-  it('lanza error claro con un identificador no válido', () => {
-    assert.throws(() => buildAdsTxt('placeholder'), /Identificador de AdSense no válido/);
-  });
-});

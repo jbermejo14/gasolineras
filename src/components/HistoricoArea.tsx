@@ -7,7 +7,7 @@ import { HISTORY_FUELS } from '@/lib/historicoFormat';
 import type { AreaHistory, AreaHistoryFile, FuelSeries, HistoryFuel } from '@/lib/historicoFormat';
 import { buildHistoricoDescription, buildHistoricoPath, buildHistoricoTitle } from '@/lib/historicoPageMeta';
 import { buildAreaIntro, formatIsoDateEs } from '@/lib/historicoStats';
-import { getSiteUrl } from '@/lib/miteco';
+import { absoluteUrl } from '@/lib/site';
 import { getBreadcrumbSchema, getDatasetSchema } from '@/lib/seo';
 
 interface HistoricoAreaProps {
@@ -36,11 +36,10 @@ function historicoAreaBreadcrumbs(area: AreaHistory) {
 }
 
 function historicoAreaSchemas(area: AreaHistory, weeks: readonly string[]) {
-  const siteUrl = getSiteUrl();
-  const url = `${siteUrl}${buildHistoricoPath(area.kind, area.slug)}`;
+  const url = absoluteUrl(buildHistoricoPath(area.kind, area.slug));
   const crumbs = [
-    { name: 'Inicio', url: siteUrl },
-    { name: HISTORICO_AREA_HOME_LABEL, url: `${siteUrl}${buildHistoricoPath('espana', 'espana')}` },
+    { name: 'Inicio', url: absoluteUrl('/') },
+    { name: HISTORICO_AREA_HOME_LABEL, url: absoluteUrl(buildHistoricoPath('espana', 'espana')) },
   ];
   if (area.kind !== 'espana') crumbs.push({ name: area.name, url });
   return [

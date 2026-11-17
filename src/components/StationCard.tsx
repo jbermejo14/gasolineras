@@ -1,9 +1,10 @@
 import React from 'react';
-import Link from 'next/link';
+import { InternalLink } from '@/components/InternalLink';
 import Image from 'next/image';
 import { formatPrice, FUEL_SHORT_LABELS, FuelType } from '@/lib/miteco';
 import type { EstacionLigera } from '@/lib/stationPayload';
 import { getStationBrand } from '@/lib/brands';
+import { assetPath } from '@/lib/site';
 import { Clock, MapPin, Navigation } from 'lucide-react';
 
 interface StationCardProps {
@@ -33,7 +34,7 @@ export function StationCard({ station, selectedFuel, isCheapest = false }: Stati
     >
       <div className="flex items-center justify-between gap-2 min-w-0">
         <h3 className="min-w-0">
-          <Link
+          <InternalLink
             href={fichaUrl}
             className={
               brand
@@ -44,7 +45,7 @@ export function StationCard({ station, selectedFuel, isCheapest = false }: Stati
             {brand ? (
               <>
                 <Image
-                  src={brand.logo}
+                  src={assetPath(brand.logo)}
                   alt={brand.name}
                   width={40}
                   height={20}
@@ -57,7 +58,7 @@ export function StationCard({ station, selectedFuel, isCheapest = false }: Stati
             ) : (
               station.rotulo
             )}
-          </Link>
+          </InternalLink>
         </h3>
 
         {isCheapest && (
@@ -105,12 +106,12 @@ export function StationCard({ station, selectedFuel, isCheapest = false }: Stati
       </div>
 
       <div className="flex items-center gap-2 pt-1">
-        <Link
+        <InternalLink
           href={fichaUrl}
           className="flex-1 min-h-10 flex items-center justify-center text-center py-2 px-3 rounded-md bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] text-xs font-semibold text-[var(--text-main)] hover:text-[var(--orange-primary)] transition-colors"
         >
           Ver Ficha Completa
-        </Link>
+        </InternalLink>
         <a
           href={gmapsUrl}
           target="_blank"

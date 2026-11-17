@@ -1,0 +1,133 @@
+{
+  "descargado": "2026-11-16T12:00:00.000Z",
+  "estaciones": {
+    "Fecha": "16/11/2026 13:00:00",
+    "ListaEESSPrecio": [
+      {
+        "C.P.": "28001",
+        "Dirección": "CALLE ALCALA, 100",
+        "Horario": "L-D: 24H",
+        "Latitud": "40,420000",
+        "Localidad": "MADRID",
+        "Longitud (WGS84)": "-3,680000",
+        "Margen": "D",
+        "Municipio": "Madrid",
+        "Precio Adblue": "1,200",
+        "Precio Gasoleo A": "1,450",
+        "Precio Gasoleo Premium": "1,550",
+        "Precio Gasolina 95 E5": "1,500",
+        "Precio Gasolina 98 E5": "1,650",
+        "Provincia": "MADRID",
+        "Remisión": "dm",
+        "Rótulo": "REPSOL",
+        "Tipo Venta": "P",
+        "IDEESS": "1001",
+        "IDMunicipio": "4375",
+        "IDProvincia": "28"
+      },
+      {
+        "C.P.": "28002",
+        "Dirección": "CALLE SERRANO, 200",
+        "Horario": "L-D: 06:00-22:00",
+        "Latitud": "40,430000",
+        "Localidad": "MADRID",
+        "Longitud (WGS84)": "-3,690000",
+        "Margen": "I",
+        "Municipio": "Madrid",
+        "Precio Gasoleo A": "1,350",
+        "Precio Gasolina 95 E5": "1,400",
+        "Provincia": "MADRID",
+        "Rótulo": "CEPSA / MOEVE",
+        "Tipo Venta": "P",
+        "IDEESS": "1002",
+        "IDMunicipio": "4375",
+        "IDProvincia": "28"
+      },
+      {
+        "C.P.": "28801",
+        "Dirección": "VIA COMPLUTENSE, 50",
+        "Horario": "L-D: 24H",
+        "Latitud": "40,480000",
+        "Localidad": "ALCALA DE HENARES",
+        "Longitud (WGS84)": "-3,360000",
+        "Municipio": "Alcalá de Henares",
+        "Precio Gasoleo A": "1,300",
+        "Precio Gasolina 95 E5": "1,350",
+        "Provincia": "MADRID",
+        "Rótulo": "PLENOIL",
+        "Tipo Venta": "P",
+        "IDEESS": "1003",
+        "IDMunicipio": "4376",
+        "IDProvincia": "28"
+      },
+      {
+        "C.P.": "08001",
+        "Dirección": "AVINGUDA DIAGONAL, 10",
+        "Horario": "L-D: 24H",
+        "Latitud": "41,380000",
+        "Localidad": "BARCELONA",
+        "Longitud (WGS84)": "2,170000",
+        "Municipio": "Barcelona",
+        "Precio Gasoleo A": "1,420",
+        "Precio Gasolina 95 E5": "1,480",
+        "Provincia": "BARCELONA",
+        "Rótulo": "BONAREA",
+        "Tipo Venta": "P",
+        "IDEESS": "2001",
+        "IDMunicipio": "801",
+        "IDProvincia": "08"
+      },
+      {
+        "C.P.": "99999",
+        "Dirección": "ESTACION SIN IDEESS",
+        "Latitud": "40,000000",
+        "Longitud (WGS84)": "-3,000000",
+        "Municipio": "Test",
+        "Provincia": "TEST",
+        "Rótulo": "SIN ID",
+        "IDEESS": ""
+      },
+      {
+        "C.P.": "99999",
+        "Dirección": "ESTACION FUERA DE ESPAÑA",
+        "Latitud": "55,755800",
+        "Longitud (WGS84)": "37,617300",
+        "Municipio": "Moscú",
+        "Provincia": "EXTRANJERO",
+        "Rótulo": "FUERA",
+        "IDEESS": "9998"
+      },
+      {
+        "C.P.": "99999",
+        "Dirección": "ESTACION CON COORDENADAS INVALIDAS",
+        "Latitud": "corrupto",
+        "Longitud (WGS84)": "invalido",
+        "Municipio": "Test",
+        "Provincia": "TEST",
+        "Rótulo": "COORD INVALIDAS",
+        "IDEESS": "9997"
+      },
+      {
+        "C.P.": "28003",
+        "Dirección": "CALLE CON PRECIOS FUERA DE RANGO",
+        "Horario": "L-D: 24H",
+        "Latitud": "40,410000",
+        "Longitud (WGS84)": "-3,700000",
+        "Municipio": "Madrid",
+        "Precio Gasolina 95 E5": "0,200",
+        "Precio Gasoleo A": "5,500",
+        "Provincia": "MADRID",
+        "Rótulo": "PRECIOS LOCOS",
+        "IDEESS": "1004",
+        "IDMunicipio": "4375",
+        "IDProvincia": "28"
+      }
+    ]
+  },
+  "provincias": [
+    {
+      "IDPovincia": "28",
+      "Provincia": "MADRID"
+    }
+  ]
+}

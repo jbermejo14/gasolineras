@@ -30,7 +30,7 @@ export function Footer({ fechaMiteco }: FooterProps) {
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs break-words text-[var(--text-muted)]">
         <div className="min-w-0">
           <p className="font-semibold text-[var(--text-main)]">
-            Gasolineras España &bull; Información de carburantes en tiempo real
+            Gasolineras España &bull; Precios de carburantes actualizados cada día
           </p>
           <p className="mt-1">
             Datos: Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO). {SITE_NAME} no está vinculado al Ministerio.

@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { LegalPage } from '@/components/LegalPage';
 import { getAdSenseClient } from '@/lib/adsense';
-import { getSiteUrl } from '@/lib/miteco';
-import { SITE_NAME } from '@/lib/site';
+import { SITE_NAME, absoluteUrl } from '@/lib/site';
 
 const PATH = '/cookies';
 const URL_COOKIES_GOOGLE = 'https://policies.google.com/technologies/cookies?hl=es';
@@ -11,7 +10,7 @@ export const metadata: Metadata = {
   title: 'Política de cookies',
   description: `Qué cookies y almacenamiento local usa ${SITE_NAME} y cómo gestionarlos.`,
   robots: { index: false, follow: true },
-  alternates: { canonical: `${getSiteUrl()}${PATH}` }
+  alternates: { canonical: absoluteUrl(PATH) }
 };
 
 export default function CookiesPage() {

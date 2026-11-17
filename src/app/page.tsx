@@ -1,15 +1,14 @@
 import Link from 'next/link';
-import { getMitecoData, getSiteUrl, calculateSavings50L, formatPrice } from '@/lib/miteco';
+import { calculateSavings50L, formatPrice } from '@/lib/miteco';
+import { getMitecoData } from '@/lib/mitecoSnapshot';
+import { absoluteUrl } from '@/lib/site';
 import { InteractiveGasFinder } from '@/components/InteractiveGasFinder';
 import { getBreadcrumbSchema } from '@/lib/seo';
 import { getHistoryIndex } from '@/lib/historico';
 import { TrendingDown, MapPin, Fuel, ShieldCheck } from 'lucide-react';
 
-export const revalidate = 1800; // 30 minutos
-
 export default async function HomePage() {
   const data = await getMitecoData();
-  const siteUrl = getSiteUrl();
   const hasHistory = getHistoryIndex() !== null;
 
   const g95Stats = data.statsNacionales.gasolina95;
@@ -27,7 +26,7 @@ export default async function HomePage() {
     .sort((a, b) => a.name.localeCompare(b.name, 'es'));
 
   // Breadcrumbs Schema
-  const breadcrumbSchema = getBreadcrumbSchema([{ name: 'Inicio', url: siteUrl }]);
+  const breadcrumbSchema = getBreadcrumbSchema([{ name: 'Inicio', url: absoluteUrl('/') }]);
 
   return (
     <>
@@ -45,10 +44,10 @@ export default async function HomePage() {
               <span>Datos oficiales de MITECO</span>
             </span>
             <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight break-words text-[var(--text-main)] leading-tight">
-              Precios de Gasolineras en España <span className="text-[var(--orange-primary)]">Hoy en Directo</span>
+              Precios de Gasolineras en España <span className="text-[var(--orange-primary)]">Hoy</span>
             </h1>
             <p className="mt-3 text-sm md:text-base text-[var(--text-muted)] leading-relaxed">
-              Monitoreamos en tiempo real las <strong>{data.estaciones.length.toLocaleString('es-ES')} estaciones de servicio</strong> activas
+              Reunimos los precios oficiales de las <strong>{data.estaciones.length.toLocaleString('es-ES')} estaciones de servicio</strong> activas, publicados por el Ministerio y actualizados cada día,
               en las 52 provincias españolas. Compara precios por provincia y municipio para ahorrar en cada repostaje.
             </p>
           </div>

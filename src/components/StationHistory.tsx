@@ -12,6 +12,7 @@ import {
 } from '@/lib/stationHistoryLoader';
 import type { FetchPartition, StationHistoryMerged } from '@/lib/stationHistoryLoader';
 import { PriceHistoryChart } from '@/components/PriceHistoryChart';
+import { assetPath } from '@/lib/site';
 
 interface StationHistoryProps {
   stationId: string;
@@ -24,7 +25,7 @@ interface StationHistoryProps {
 type StationHistoryStatus = 'loading' | 'error' | 'ready';
 type StationHistoryScope = 'recent' | 'all';
 
-const STATION_HISTORY_DEFAULT_BASE_URL = '/historico-estaciones';
+const STATION_HISTORY_DEFAULT_BASE_URL = assetPath('/historico-estaciones');
 const STATION_HISTORY_HTTP_NOT_FOUND = 404;
 const STATION_HISTORY_TRAILING_SLASHES = /\/+$/;
 const STATION_HISTORY_EMPTY_TEXT = 'No hay histórico para esta gasolinera';
