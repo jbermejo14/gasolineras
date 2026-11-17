@@ -174,7 +174,7 @@ interface LeafletMapProps {
    - la estación `highlightStationId` nunca se agrupa: siempre marcador individual con popup abierto.
    - limpia y repinta la capa de marcadores (`layerGroup.clearLayers()`).
 2. **Precio** de una estación: `precios[selectedFuel]`; si es null, se usa `gasolina95` y luego `diesel` (comportamiento actual).
-3. **Burbuja de grupo:** `L.divIcon` circular con el número de estaciones (formato `toLocaleString('es-ES')`) y debajo "desde 1,234" (mínimo de precios del grupo con `minNonNull`; se omite si es null). Tres tamaños por número de miembros: < 10, < 100, ≥ 100 (constantes con nombre). Al tocarla: `map.fitBounds(bounds del grupo, { padding: [48, 48] })`; si los miembros tienen todos la misma posición, `map.setView(centro, CLUSTERING_MAX_ZOOM + 1)`.
+3. **Burbuja de grupo:** `L.divIcon` circular con el número de estaciones (formato `toLocaleString('es-ES')`) y debajo el precio corto "1,234€" con coma decimal, sin la palabra "desde" (mínimo de precios del grupo con `minNonNull`; se omite si es null y se oculta en la burbuja pequeña por falta de espacio). Tres tamaños por número de miembros: < 10, < 100, ≥ 100 (constantes con nombre). Al tocarla: `map.fitBounds(bounds del grupo, { padding: [48, 48] })`; si los miembros tienen todos la misma posición, `map.setView(centro, CLUSTERING_MAX_ZOOM + 1)`.
 4. **Marcador individual:** el pin de precio actual (`.custom-station-pin`). El popup se crea **al abrirse** (`bindPopup(() => html)`), no para todas las estaciones por adelantado. Todo texto de MITECO que entra en HTML (rótulo, dirección, municipio) pasa por una función local `escapeHtml`. Los enlaces "Ver Ficha" y "Ruta GPS" del popup miden al menos 40 px de alto.
 5. **Encuadre inicial.** Cuando cambia `stations` y no hay `highlightStationId`: si hay estaciones peninsulares/baleares (lat ≥ 34) y canarias (lat < 34), se encuadran solo las primeras (Canarias tiene su botón); `fitBounds` con `maxZoom: 15`. Con una sola estación: `setView(..., 15)`. Con cero: no se mueve. El encuadre **no** se repite en `moveend` (evitar bucles).
 6. **Barra superior en móvil:** contador "N gasolineras" (total de `stations`); botones Península / Canarias; selector de capa. En pantallas < 640 px el selector de capa es un `<select>` nativo (Oscuro, CARTO, OSM, Satélite) y todo cabe en una o dos filas sin desbordar; en ≥ 640 px se mantienen los botones actuales. Todos los controles miden al menos 36 px de alto en móvil.
@@ -255,7 +255,7 @@ interface StationCardProps {
 ## 5. Diseño de interfaz
 
 - **Paleta:** la existente (negro y naranja `--orange-primary`, modo claro/oscuro con variables CSS).
-- **Mapa, zoom lejano:** burbujas naranjas translúcidas con borde naranja sólido; número en negrita; línea pequeña "desde 1,234". Pequeña 40 px, mediana 52 px, grande 64 px.
+- **Mapa, zoom lejano:** burbujas naranjas translúcidas con borde naranja sólido; número en negrita; línea pequeña con el precio mínimo, p. ej. "1,234€" (oculta en la pequeña). Pequeña 40 px, mediana 52 px, grande 64 px.
 - **Mapa, zoom cercano:** pines de precio actuales.
 - **Móvil:** una columna; filtros desplazables en horizontal; mapa al 70 % del alto de la pantalla; conmutador Lista/Mapa a ancho completo.
 - **Estados del buscador:** cargando (esqueleto), error (mensaje + Reintentar), vacío (mensaje actual + Restablecer filtros), listo.

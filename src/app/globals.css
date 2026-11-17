@@ -3,6 +3,11 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  /* Evita que Safari iOS agrande el texto al girar el móvil a horizontal. */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   :root {
     --bg-main: #0c0d10;
     --bg-header: #08090b;
@@ -126,4 +131,117 @@ body {
 
 .animate-pulse-glow {
   animation: pulse-glow 2s infinite ease-in-out;
+}
+
+/* Utilidad: oculta la barra de desplazamiento de filas desplazables en horizontal */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Burbujas de grupos de estaciones en el mapa */
+.station-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(255, 102, 0, 0.78);
+  border: 2px solid var(--orange-primary);
+  color: #000;
+  line-height: 1.1;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+}
+
+.station-cluster__count {
+  font-weight: 800;
+}
+
+.station-cluster__price {
+  font-family: monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* En la burbuja pequeña (40 px) no cabe la línea de precio */
+.station-cluster--small .station-cluster__price {
+  display: none;
+}
+
+.station-cluster--small .station-cluster__count { font-size: 0.8rem; }
+.station-cluster--medium .station-cluster__count { font-size: 0.95rem; }
+.station-cluster--large .station-cluster__count { font-size: 1.1rem; }
+
+.station-cluster:hover {
+  background-color: var(--orange-hover);
+}
+
+/* Popup de estación */
+.station-popup {
+  padding: 12px;
+  min-width: 220px;
+  font-family: inherit;
+}
+
+.station-popup__name {
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.station-popup__address {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.station-popup__price {
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--orange-primary);
+  margin-bottom: 8px;
+}
+
+.station-popup__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.station-popup__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 40px;
+  font-size: 12px;
+  padding: 0 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.station-popup__link--primary {
+  background-color: var(--orange-primary);
+  color: #000;
+  font-weight: 700;
+}
+
+.station-popup__link--secondary {
+  background-color: var(--border-color);
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+@media (max-width: 639px) {
+  .leaflet-popup-content {
+    max-width: 280px;
+  }
 }
