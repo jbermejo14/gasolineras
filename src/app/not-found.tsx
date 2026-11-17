@@ -3,11 +3,11 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-12 text-center max-w-xl mx-auto my-12 space-y-4 shadow-md">
+    <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-6 md:p-12 text-center max-w-xl mx-auto my-6 md:my-12 space-y-4 shadow-md">
       <div className="w-16 h-16 rounded-full bg-[var(--orange-subtle)] border border-[var(--orange-border)] flex items-center justify-center mx-auto text-2xl">
         ⛽
       </div>
-      <h2 className="text-2xl font-extrabold text-[var(--text-main)]">
+      <h2 className="text-xl md:text-2xl font-extrabold break-words text-[var(--text-main)]">
         Página o gasolinera no encontrada (404)
       </h2>
       <p className="text-sm text-[var(--text-muted)] leading-relaxed">
@@ -16,7 +16,7 @@ export default function NotFound() {
       <div className="pt-4">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--orange-primary)] text-black font-extrabold text-xs hover:bg-[var(--orange-hover)] transition-all shadow-md shadow-[var(--orange-glow)]"
+          className="inline-flex items-center gap-2 px-5 min-h-11 rounded-xl bg-[var(--orange-primary)] text-black font-extrabold text-xs hover:bg-[var(--orange-hover)] transition-all shadow-md shadow-[var(--orange-glow)]"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Volver al buscador principal</span>

@@ -1,10 +1,19 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getMitecoData, getSiteUrl } from '@/lib/miteco';
 
 export const revalidate = 1800; // 30 minutos ISR
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ff6600' },
+    { media: '(prefers-color-scheme: dark)', color: '#08090b' },
+  ],
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = getSiteUrl();
@@ -61,7 +70,7 @@ export default async function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col bg-[var(--bg-main)] text-[var(--text-main)] antialiased">
         <Header fechaMiteco={fechaMiteco} />
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 md:py-8">{children}</main>
+        <main className="flex-1 min-w-0 max-w-7xl w-full mx-auto px-4 py-4 md:py-8">{children}</main>
         <Footer fechaMiteco={fechaMiteco} />
       </body>
     </html>

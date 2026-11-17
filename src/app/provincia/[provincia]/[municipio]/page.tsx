@@ -124,16 +124,16 @@ export default async function MunicipioPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-8 min-w-0">
         <Breadcrumbs items={breadcrumbs} />
 
         {/* Encabezado y Resumen Real del Municipio */}
-        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-6 md:p-8 shadow-md">
+        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 md:p-8 shadow-md">
           <div className="max-w-3xl">
             <span className="text-xs font-bold text-[var(--orange-primary)] uppercase tracking-wider block mb-2">
               {munObj.provincia} &bull; Comparador Municipal
             </span>
-            <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-[var(--text-main)]">
+            <h1 className="text-xl md:text-4xl font-extrabold tracking-tight break-words text-[var(--text-main)]">
               Gasolineras más baratas en <span className="text-[var(--orange-primary)]">{munObj.municipio}</span> hoy
             </h1>
             <p className="mt-3 text-sm md:text-base text-[var(--text-muted)] leading-relaxed">
@@ -150,10 +150,10 @@ export default async function MunicipioPage({ params }: PageProps) {
           </div>
 
           {/* Cifras Reales Clave Municipales */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-[var(--border-subtle)]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 md:mt-6 pt-4 md:pt-6 border-t border-[var(--border-subtle)]">
             <div className="p-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)]">
               <div className="text-xs text-[var(--text-muted)] font-medium">Más Barata Gasolina 95</div>
-              <div className="font-mono text-2xl font-extrabold text-[var(--orange-primary)] mt-1">
+              <div className="font-mono text-xl md:text-2xl font-extrabold text-[var(--orange-primary)] mt-1">
                 {formatPrice(minG95Mun)}
               </div>
               <div className="text-xs text-[var(--text-dim)] mt-1">
@@ -163,7 +163,7 @@ export default async function MunicipioPage({ params }: PageProps) {
 
             <div className="p-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)]">
               <div className="text-xs text-[var(--text-muted)] font-medium">Más Barata Diésel</div>
-              <div className="font-mono text-2xl font-extrabold text-[var(--orange-primary)] mt-1">
+              <div className="font-mono text-xl md:text-2xl font-extrabold text-[var(--orange-primary)] mt-1">
                 {formatPrice(minDieselMun)}
               </div>
               <div className="text-xs text-[var(--text-dim)] mt-1">
@@ -173,7 +173,7 @@ export default async function MunicipioPage({ params }: PageProps) {
 
             <div className="p-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)]">
               <div className="text-xs text-[var(--text-muted)] font-medium">Ahorro Depósito 50L (G95)</div>
-              <div className="font-mono text-2xl font-extrabold text-emerald-500 mt-1">
+              <div className="font-mono text-xl md:text-2xl font-extrabold text-emerald-500 mt-1">
                 {savingsG95Mun !== null ? `+${savingsG95Mun.toFixed(2)} €` : '--'}
               </div>
               <div className="text-xs text-[var(--text-dim)] mt-1">en {munObj.municipio}</div>
@@ -181,7 +181,7 @@ export default async function MunicipioPage({ params }: PageProps) {
 
             <div className="p-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)]">
               <div className="text-xs text-[var(--text-muted)] font-medium">Ahorro Depósito 50L (Diésel)</div>
-              <div className="font-mono text-2xl font-extrabold text-emerald-500 mt-1">
+              <div className="font-mono text-xl md:text-2xl font-extrabold text-emerald-500 mt-1">
                 {savingsDieselMun !== null ? `+${savingsDieselMun.toFixed(2)} €` : '--'}
               </div>
               <div className="text-xs text-[var(--text-dim)] mt-1">en {munObj.municipio}</div>
@@ -190,10 +190,10 @@ export default async function MunicipioPage({ params }: PageProps) {
         </div>
 
         {/* Tabla Ordenada por Precio (Indexable y legible sin JS) */}
-        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-6 shadow-sm space-y-4">
+        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 md:p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <h2 className="text-xl font-extrabold text-[var(--text-main)]">
+              <h2 className="text-lg md:text-xl font-extrabold text-[var(--text-main)]">
                 Tabla comparativa de gasolineras en {munObj.municipio}
               </h2>
               <p className="text-xs text-[var(--text-muted)] mt-1">
@@ -209,18 +209,18 @@ export default async function MunicipioPage({ params }: PageProps) {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] uppercase tracking-wider font-extrabold">
-                  <th className="py-3 px-3">Estación / Marca</th>
-                  <th className="py-3 px-3">Dirección</th>
-                  <th className="py-3 px-3 text-right">Gasolina 95</th>
-                  <th className="py-3 px-3 text-right">Diésel (A)</th>
-                  <th className="py-3 px-3">Horario</th>
-                  <th className="py-3 px-3 text-center">Acciones</th>
+                  <th className="py-2 px-2 sm:px-3">Estación / Marca</th>
+                  <th className="hidden md:table-cell py-2 px-2 sm:px-3">Dirección</th>
+                  <th className="py-2 px-2 sm:px-3 text-right">Gasolina 95</th>
+                  <th className="py-2 px-2 sm:px-3 text-right">Diésel (A)</th>
+                  <th className="hidden lg:table-cell py-2 px-2 sm:px-3">Horario</th>
+                  <th className="py-2 px-2 sm:px-3 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-subtle)]">
                 {sortedStations.map((s, idx) => (
                   <tr key={s.id} className="hover:bg-[var(--bg-card-hover)] transition-colors">
-                    <td className="py-3 px-3">
+                    <td className="py-2 px-2 sm:px-3">
                       <Link
                         href={`/gasolinera/${s.id}-${s.slug}`}
                         className="font-bold text-[var(--text-main)] hover:text-[var(--orange-primary)] transition-colors block text-sm"
@@ -233,23 +233,23 @@ export default async function MunicipioPage({ params }: PageProps) {
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-3 text-[var(--text-muted)] max-w-xs truncate">
+                    <td className="hidden md:table-cell py-2 px-2 sm:px-3 text-[var(--text-muted)] max-w-xs truncate">
                       {s.direccion}
                     </td>
-                    <td className="py-3 px-3 text-right font-mono font-extrabold text-sm text-[var(--orange-primary)]">
+                    <td className="py-2 px-2 sm:px-3 text-right font-mono font-extrabold text-sm text-[var(--orange-primary)]">
                       {formatPrice(s.precios.gasolina95)}
                     </td>
-                    <td className="py-3 px-3 text-right font-mono font-extrabold text-sm text-[var(--text-main)]">
+                    <td className="py-2 px-2 sm:px-3 text-right font-mono font-extrabold text-sm text-[var(--text-main)]">
                       {formatPrice(s.precios.diesel)}
                     </td>
-                    <td className="py-3 px-3 text-[var(--text-dim)]">
+                    <td className="hidden lg:table-cell py-2 px-2 sm:px-3 text-[var(--text-dim)]">
                       {s.horario}
                     </td>
-                    <td className="py-3 px-3 text-center">
+                    <td className="py-2 px-2 sm:px-3 text-center">
                       <div className="flex items-center justify-center gap-1.5">
                         <Link
                           href={`/gasolinera/${s.id}-${s.slug}`}
-                          className="px-2.5 py-1 rounded bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] text-[var(--text-main)] text-[11px] font-semibold transition-colors"
+                          className="inline-flex items-center min-h-10 px-3 rounded bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] text-[var(--text-main)] text-[11px] font-semibold transition-colors"
                         >
                           Ficha
                         </Link>
@@ -257,7 +257,7 @@ export default async function MunicipioPage({ params }: PageProps) {
                           href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-2 py-1 rounded bg-[var(--orange-primary)] text-black text-[11px] font-bold hover:bg-[var(--orange-hover)] transition-colors"
+                          className="inline-flex items-center min-h-10 px-3 rounded bg-[var(--orange-primary)] text-black text-[11px] font-bold hover:bg-[var(--orange-hover)] transition-colors"
                           title="Ruta en Google Maps"
                         >
                           Ruta
@@ -273,7 +273,7 @@ export default async function MunicipioPage({ params }: PageProps) {
 
         {/* Tarjetas Visuales de las Gasolineras del Municipio */}
         <div className="space-y-4">
-          <h2 className="text-xl font-extrabold text-[var(--text-main)]">
+          <h2 className="text-lg md:text-xl font-extrabold text-[var(--text-main)]">
             Detalle de estaciones en {munObj.municipio}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -285,7 +285,7 @@ export default async function MunicipioPage({ params }: PageProps) {
 
         {/* Mapa Municipal (Cliente con Leaflet) */}
         <div className="space-y-3">
-          <h2 className="text-xl font-extrabold text-[var(--text-main)]">
+          <h2 className="text-lg md:text-xl font-extrabold text-[var(--text-main)]">
             Mapa de gasolineras en {munObj.municipio}
           </h2>
           <ClientMapWrapper
@@ -298,19 +298,19 @@ export default async function MunicipioPage({ params }: PageProps) {
 
         {/* Municipios Cercanos de la Misma Provincia (Enlaces Internos) */}
         {nearbyMunicipios.length > 0 && (
-          <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-6 shadow-sm space-y-4">
+          <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 md:p-6 shadow-sm space-y-4">
             <h2 className="text-lg font-extrabold text-[var(--text-main)] flex items-center gap-2">
               <Building2 className="w-5 h-5 text-[var(--orange-primary)]" />
               <span>Otros municipios con gasolineras en {munObj.provincia}</span>
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
               {nearbyMunicipios.map((nm) => (
                 <Link
                   key={nm.slug}
                   href={`/provincia/${provSlug}/${nm.slug}`}
-                  className="p-2.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] hover:bg-[var(--bg-card-hover)] transition-all text-xs font-semibold text-[var(--text-main)] hover:text-[var(--orange-primary)] line-clamp-1"
+                  className="flex items-center min-h-10 min-w-0 p-2.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] hover:bg-[var(--bg-card-hover)] transition-all text-xs font-semibold text-[var(--text-main)] hover:text-[var(--orange-primary)]"
                 >
-                  {nm.name}
+                  <span className="truncate">{nm.name}</span>
                 </Link>
               ))}
             </div>

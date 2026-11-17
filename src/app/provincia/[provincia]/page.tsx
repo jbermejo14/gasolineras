@@ -123,16 +123,16 @@ export default async function ProvinciaPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-8 min-w-0">
         <Breadcrumbs items={breadcrumbs} />
 
         {/* Encabezado y Resumen Real */}
-        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-6 md:p-8 shadow-md">
+        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 md:p-8 shadow-md">
           <div className="max-w-3xl">
             <span className="text-xs font-bold text-[var(--orange-primary)] uppercase tracking-wider block mb-2">
               Comunidad y Provincia
             </span>
-            <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-[var(--text-main)]">
+            <h1 className="text-xl md:text-4xl font-extrabold tracking-tight break-words text-[var(--text-main)]">
               Gasolineras en <span className="text-[var(--orange-primary)]">{provObj.provincia}</span>
             </h1>
             <p className="mt-3 text-sm md:text-base text-[var(--text-muted)] leading-relaxed">
@@ -143,10 +143,10 @@ export default async function ProvinciaPage({ params }: PageProps) {
           </div>
 
           {/* Cifras Reales Clave de la Provincia */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-[var(--border-subtle)]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 md:mt-6 pt-4 md:pt-6 border-t border-[var(--border-subtle)]">
             <div className="p-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)]">
               <div className="text-xs text-[var(--text-muted)] font-medium">Mínimo Gasolina 95</div>
-              <div className="font-mono text-2xl font-extrabold text-[var(--orange-primary)] mt-1">
+              <div className="font-mono text-xl md:text-2xl font-extrabold text-[var(--orange-primary)] mt-1">
                 {formatPrice(minG95)}
               </div>
               <div className="text-xs text-[var(--text-dim)] mt-1">
@@ -156,7 +156,7 @@ export default async function ProvinciaPage({ params }: PageProps) {
 
             <div className="p-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)]">
               <div className="text-xs text-[var(--text-muted)] font-medium">Mínimo Diésel</div>
-              <div className="font-mono text-2xl font-extrabold text-[var(--orange-primary)] mt-1">
+              <div className="font-mono text-xl md:text-2xl font-extrabold text-[var(--orange-primary)] mt-1">
                 {formatPrice(minDiesel)}
               </div>
               <div className="text-xs text-[var(--text-dim)] mt-1">
@@ -166,7 +166,7 @@ export default async function ProvinciaPage({ params }: PageProps) {
 
             <div className="p-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)]">
               <div className="text-xs text-[var(--text-muted)] font-medium">Ahorro Depósito 50L (G95)</div>
-              <div className="font-mono text-2xl font-extrabold text-emerald-500 mt-1">
+              <div className="font-mono text-xl md:text-2xl font-extrabold text-emerald-500 mt-1">
                 {savingsG95 !== null ? `+${savingsG95.toFixed(2)} €` : '--'}
               </div>
               <div className="text-xs text-[var(--text-dim)] mt-1">frente a la media de {provObj.provincia}</div>
@@ -174,7 +174,7 @@ export default async function ProvinciaPage({ params }: PageProps) {
 
             <div className="p-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)]">
               <div className="text-xs text-[var(--text-muted)] font-medium">Ahorro Depósito 50L (Diésel)</div>
-              <div className="font-mono text-2xl font-extrabold text-emerald-500 mt-1">
+              <div className="font-mono text-xl md:text-2xl font-extrabold text-emerald-500 mt-1">
                 {savingsDiesel !== null ? `+${savingsDiesel.toFixed(2)} €` : '--'}
               </div>
               <div className="text-xs text-[var(--text-dim)] mt-1">frente a la media de {provObj.provincia}</div>
@@ -185,7 +185,7 @@ export default async function ProvinciaPage({ params }: PageProps) {
         {/* Top Más Baratas Gasolina 95 */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-extrabold text-[var(--text-main)] flex items-center gap-2">
+            <h2 className="text-lg md:text-xl font-extrabold text-[var(--text-main)] flex items-center gap-2">
               <Fuel className="w-5 h-5 text-[var(--orange-primary)]" />
               <span>Las más baratas de Gasolina 95 en {provObj.provincia}</span>
             </h2>
@@ -200,7 +200,7 @@ export default async function ProvinciaPage({ params }: PageProps) {
         {/* Top Más Baratas Diésel */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-extrabold text-[var(--text-main)] flex items-center gap-2">
+            <h2 className="text-lg md:text-xl font-extrabold text-[var(--text-main)] flex items-center gap-2">
               <Fuel className="w-5 h-5 text-[var(--orange-primary)]" />
               <span>Las más baratas de Diésel (Gasóleo A) en {provObj.provincia}</span>
             </h2>
@@ -213,10 +213,10 @@ export default async function ProvinciaPage({ params }: PageProps) {
         </div>
 
         {/* Directorio de Municipios con Gasolineras */}
-        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-6 md:p-8 shadow-sm space-y-4">
+        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 md:p-8 shadow-sm space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <h2 className="text-xl font-extrabold text-[var(--text-main)] flex items-center gap-2">
+              <h2 className="text-lg md:text-xl font-extrabold text-[var(--text-main)] flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-[var(--orange-primary)]" />
                 <span>Municipios con gasolineras en {provObj.provincia}</span>
               </h2>
@@ -229,12 +229,12 @@ export default async function ProvinciaPage({ params }: PageProps) {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 pt-2">
+          <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 pt-2">
             {municipiosList.map((m) => (
               <Link
                 key={m.slug}
                 href={`/provincia/${provSlug}/${m.slug}`}
-                className="p-2.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] hover:bg-[var(--bg-card-hover)] transition-all flex flex-col justify-between group"
+                className="min-h-12 min-w-0 p-2.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] hover:bg-[var(--bg-card-hover)] transition-all flex flex-col justify-center group"
               >
                 <span className="text-xs font-bold text-[var(--text-main)] group-hover:text-[var(--orange-primary)] transition-colors line-clamp-1">
                   {m.name}

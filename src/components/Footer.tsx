@@ -7,9 +7,9 @@ interface FooterProps {
 
 export function Footer({ fechaMiteco }: FooterProps) {
   return (
-    <footer className="mt-auto border-t border-[var(--border-color)] bg-[var(--bg-header)] py-8 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[var(--text-muted)]">
-        <div>
+    <footer className="mt-auto border-t border-[var(--border-color)] bg-[var(--bg-header)] py-6 md:py-8 transition-colors">
+      <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs break-words text-[var(--text-muted)]">
+        <div className="min-w-0">
           <p className="font-semibold text-[var(--text-main)]">
             Gasolineras España &bull; Información de carburantes en tiempo real
           </p>
@@ -19,8 +19,8 @@ export function Footer({ fechaMiteco }: FooterProps) {
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
-          <Link href="/" className="hover:text-[var(--orange-primary)] transition-colors">
+        <div className="flex items-center gap-4 flex-wrap">
+          <Link href="/" className="inline-flex items-center min-h-10 hover:text-[var(--orange-primary)] transition-colors">
             Inicio
           </Link>
           <span className="text-[var(--border-color)]">&bull;</span>
