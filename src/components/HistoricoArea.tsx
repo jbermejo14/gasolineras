@@ -82,7 +82,9 @@ export function HistoricoArea({ areaFile, spain }: HistoricoAreaProps) {
         </div>
 
         <div className={`${HISTORICO_AREA_CARD_CLASS} min-w-0`}>
-          <PriceHistoryChart weeks={weeks} series={historicoAreaChartSeries(area)} title={`Evolución del precio en ${area.name}`} />
+          <PriceHistoryChart weeks={weeks} series={historicoAreaChartSeries(area)} title={`Evolución del precio en ${area.name}`}
+            defaultRange="all"
+          />
         </div>
 
         <section className={`${HISTORICO_AREA_CARD_CLASS} space-y-4 min-w-0`}>
