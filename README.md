@@ -13,7 +13,8 @@ Genera páginas indexables en el servidor para **52 provincias**, **~3.250 munic
    - Mapa del buscador: muestra **todas** las gasolineras que cumplen los filtros. Con zoom lejano se agrupan en burbujas (número de estaciones y precio mínimo); al acercarse (zoom 15 o más) aparecen todas sueltas con su precio. Solo se pintan las de la zona visible. La agrupación es una rejilla en píxeles propia (`src/lib/stationClustering.ts`), sin dependencias extra.
    - `/provincia/[provincia]`: Las más baratas por combustible, medias provinciales vs nacionales y directorio de municipios.
    - `/provincia/[provincia]/[municipio]`: Gasolineras más baratas hoy en el municipio, tabla ordenada por precio legible sin JavaScript, comparativa frente a la provincia, mapa municipal y municipios cercanos.
-   - `/gasolinera/[id]-[slug]`: Ficha técnica de la estación con todos los carburantes disponibles, comparativa de ahorro, horario y mapa "Cómo llegar" con GPS.
+   - `/gasolinera/[id]-[slug]`: Ficha técnica de la estación con todos los carburantes disponibles, comparativa de ahorro, horario, mapa "Cómo llegar" con GPS y gráfica de evolución de su precio desde 2016.
+   - `/historico`, `/historico/comunidad/[comunidad]`, `/historico/provincia/[provincia]` y `/historico/marca/[marca]`: evolución semanal del precio de Gasolina 95, Diésel, Gasolina 98 y Diésel Premium desde 2016 (ver [Histórico de precios](#-histórico-de-precios)).
    - `404`: Devuelve `notFound()` estricto para cualquier slug inexistente (nunca páginas genéricas).
 
 2. **Módulo Central de Datos (`lib/miteco.ts`)**:
@@ -95,6 +96,8 @@ Pruebas cubiertas:
 - Agrupación de estaciones del mapa por rejilla y fusión de burbujas solapadas (`tests/stationClustering.test.ts`).
 - Formato ligero de `/api/estaciones` (`tests/stationPayload.test.ts`).
 - Filtrado, ordenación y estadísticas del buscador (`tests/gasFinderLogic.test.ts`).
+- Reconocimiento de marcas por palabra completa (`tests/brands.test.ts`).
+- Histórico: fechas y codificación delta (`tests/historicoFormat.test.ts`), comunidades (`tests/ccaa.test.ts`), agregación por área y particiones (`tests/historicoBuild.test.ts`), resúmenes y textos (`tests/historicoStats.test.ts`), geometría de la gráfica (`tests/priceChartGeometry.test.ts`), argumentos del script (`tests/historicoScript.test.ts`) y carga del histórico por gasolinera (`tests/stationHistoryLoader.test.ts`).
 
 Comprobación de tipos de todo el proyecto:
 
@@ -116,6 +119,51 @@ npm run dev
 npm run build
 npm start
 ```
+
+---
+
+## 📈 Histórico de precios
+
+Las gráficas históricas usan el precio vigente **cada lunes** desde el 4 de enero de 2016, descargado del servicio histórico de MITECO (`EstacionesTerrestresHist/{dd-mm-yyyy}`). El diseño completo está en [ARCHITECTURE.md](ARCHITECTURE.md), Parte 2.
+
+### Generar o actualizar los datos
+
+```bash
+npm run historico
+```
+
+- Descarga solo las semanas que faltan (la primera vez, unas 570 semanas y ~6,5 GB; tarda más de una hora). Se pueden cortar y reanudar: lo descargado queda en caché.
+- Opciones: `--hasta=yyyy-mm-dd` (último lunes a incluir), `--subir` (sube a R2 las particiones de los años con semanas nuevas), `--subir-todo` (sube todas).
+- Termina con código 1 si alguna semana o subida ha fallado; basta con volver a ejecutarlo.
+
+| Ruta | Contenido | ¿En git? |
+|---|---|---|
+| `data/historico/cache/` | Una foto comprimida por lunes (evita volver a descargar) | No |
+| `data/historico/indice.json` y `data/historico/areas/` | Series de España, comunidades, provincias y marcas (las usan las páginas `/historico`) | **Sí**: commitéalas tras cada actualización |
+| `public/historico-estaciones/` | Histórico por gasolinera, partido por provincia y año | No (va a R2) |
+
+Para mantenerlo al día, programa una ejecución semanal (p. ej. los martes, cuando MITECO ya ha publicado el lunes) con `npm run historico -- --subir`, commitea `data/historico/` y vuelve a desplegar.
+
+### Cloudflare R2 (histórico por gasolinera)
+
+1. Crea un bucket en R2 y dale acceso público (dominio propio o `r2.dev`).
+2. Configura CORS del bucket para permitir `GET` desde el dominio de la web:
+   ```json
+   [{ "AllowedOrigins": ["https://tu-dominio.es"], "AllowedMethods": ["GET"], "AllowedHeaders": ["*"], "MaxAgeSeconds": 86400 }]
+   ```
+3. Crea un token de API de R2 con permiso de escritura en ese bucket y define en `.env.local`:
+   ```env
+   R2_ACCOUNT_ID=...
+   R2_ACCESS_KEY_ID=...
+   R2_SECRET_ACCESS_KEY=...
+   R2_BUCKET=...
+   ```
+4. Sube todo la primera vez con `npm run historico -- --subir-todo`.
+5. En el entorno de la web, apunta el navegador al bucket (los ficheros están bajo el prefijo `estaciones/`):
+   ```env
+   NEXT_PUBLIC_HISTORICO_BASE_URL=https://tu-dominio-de-datos.es/estaciones
+   ```
+   Sin esta variable se usa `/historico-estaciones`, es decir, los ficheros locales de `public/` (útil en desarrollo).
 
 ---
 
