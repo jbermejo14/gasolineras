@@ -76,6 +76,27 @@ describe('summarizeSeries', () => {
     assert.equal(summarizeSeries(weeks, values).yearAgo?.date, weeks[8]);
   });
 
+  it('yearAgo con empate de distancia: gana el más antiguo', () => {
+    const weeks = weeksFrom(60);
+    const values: FuelSeries = weeks.map(() => null);
+    values[59] = 1000;
+    values[5] = 900;
+    values[9] = 950;
+    assert.equal(summarizeSeries(weeks, values).yearAgo?.date, weeks[5]);
+  });
+
+  it('changePct redondea simétrico: -6,25 → -6,3 y 6,25 → 6,3', () => {
+    const weeks = weeksFrom(60);
+    const down: FuelSeries = weeks.map(() => null);
+    down[59] = 1500;
+    down[7] = 1600;
+    assert.equal(summarizeSeries(weeks, down).changePct, -6.3);
+    const up: FuelSeries = weeks.map(() => null);
+    up[59] = 1700;
+    up[7] = 1600;
+    assert.equal(summarizeSeries(weeks, up).changePct, 6.3);
+  });
+
   it('yearAgo ausente si no hay valor entre 50 y 54 semanas', () => {
     const weeks = weeksFrom(60);
     const values: FuelSeries = weeks.map(() => null);
@@ -135,7 +156,7 @@ describe('buildAreaIntro', () => {
     assert.ok(intro.includes('1,800 €/l'));
     assert.ok(intro.includes(formatIsoDateEs(weeks[30])));
     assert.ok(intro.includes('un 7,1 % más'));
-    assert.ok(intro.includes('un 6,2 % menos'));
+    assert.ok(intro.includes('un 6,3 % menos'));
     assert.ok(intro.includes('5,0 céntimos por encima de la media nacional'));
     assert.ok(intro.includes('en la media nacional'));
   });
@@ -150,9 +171,31 @@ describe('buildAreaIntro', () => {
   it('varía según el tipo de área', () => {
     const comunidad = buildAreaIntro(makeArea('comunidad', 'Galicia', g95, diesel), weeks, null);
     const marca = buildAreaIntro(makeArea('marca', 'Repsol', g95, diesel), weeks, null);
-    assert.match(comunidad, /comunidad de Galicia/);
+    assert.match(comunidad, /^En Galicia, /);
     assert.match(marca, /gasolineras Repsol/);
     assert.ok(!comunidad.includes('nacional'));
+  });
+
+  it('comunidad: usa el nombre oficial sin anteponer "la comunidad de"', () => {
+    const madrid = buildAreaIntro(makeArea('comunidad', 'Comunidad de Madrid', g95, diesel), weeks, null);
+    const rioja = buildAreaIntro(makeArea('comunidad', 'La Rioja', g95, diesel), weeks, null);
+    assert.ok(madrid.startsWith('En Comunidad de Madrid, '));
+    assert.ok(!madrid.includes('comunidad de Comunidad'));
+    assert.ok(rioja.startsWith('En La Rioja, '));
+    assert.ok(!rioja.includes('de La Rioja'));
+  });
+
+  it('máximos de los dos carburantes en una frase y en singular si solo hay uno', () => {
+    const area = makeArea('provincia', 'Madrid', g95, diesel);
+    const both = buildAreaIntro(area, weeks, null);
+    assert.ok(
+      both.includes(
+        `Los máximos históricos fueron de 1,800 €/l el ${formatIsoDateEs(weeks[30])} en la gasolina 95 y de 1,600 €/l el ${formatIsoDateEs(weeks[7])} en el diésel.`,
+      ),
+    );
+    const none = weeks.map(() => null);
+    const single = buildAreaIntro(makeArea('provincia', 'Madrid', g95, none), weeks, null);
+    assert.ok(single.includes('El máximo histórico fue de 1,800 €/l'));
   });
 
   it('omite un carburante sin datos sin romper la frase', () => {

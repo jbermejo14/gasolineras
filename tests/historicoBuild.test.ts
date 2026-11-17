@@ -39,7 +39,7 @@ function snapshot(date: string, stations: WeekStationRecord[]): WeekSnapshot {
 }
 
 test('buildWeekSnapshot convierte precios, descarta sin IDEESS y anula inválidos', () => {
-  const raw = JSON.parse(readFileSync('tests/fixtures/miteco-sample.json', 'utf8'));
+  const raw = JSON.parse(readFileSync(new URL('./fixtures/miteco-sample.json', import.meta.url), 'utf8'));
   const result = buildWeekSnapshot(raw, '2026-11-16');
   assert.equal(result.date, '2026-11-16');
   assert.deepEqual(
@@ -57,6 +57,11 @@ test('buildWeekSnapshot convierte precios, descarta sin IDEESS y anula inválido
 
 test('buildWeekSnapshot tolera respuesta vacía', () => {
   assert.deepEqual(buildWeekSnapshot({}, '2016-01-04').stations, []);
+});
+
+test('buildProvinceTable usa IDProvincia si IDPovincia viene vacío', () => {
+  const table = buildProvinceTable([{ IDPovincia: '', IDProvincia: '28', IDCCAA: '13', Provincia: 'MADRID' }]);
+  assert.equal(table.get('28')?.name, 'Madrid');
 });
 
 test('buildProvinceTable genera nombre, slug y comunidad', () => {
@@ -183,4 +188,14 @@ test('particiones: RangeError con fecha ajena al año', () => {
     () => buildStationPartitionsForYear(2016, ['2016-01-04'], [snapshot('2016-01-11', [])]),
     RangeError
   );
+});
+
+test('particiones: RangeError con fecha duplicada o con semana de otro año en weeksOfYear', () => {
+  const weeks = ['2016-01-04', '2016-01-11'];
+  assert.throws(
+    () =>
+      buildStationPartitionsForYear(2016, weeks, [snapshot('2016-01-04', []), snapshot('2016-01-04', [])]),
+    RangeError
+  );
+  assert.throws(() => buildStationPartitionsForYear(2016, ['2016-12-26', '2017-01-02'], []), RangeError);
 });

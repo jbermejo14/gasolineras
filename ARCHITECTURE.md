@@ -503,7 +503,7 @@ export function loadAreaHistory(kind: AreaKind, slug: string): AreaHistoryFile |
 
 **Aceptación** (`tests/historicoStats.test.ts`): resúmenes con nulls, empates, serie vacía, yearAgo ausente; formatos; `buildAreaIntro` contiene las cifras esperadas y no menciona España cuando el área es España.
 
-### H5 — Gráfica: `src/lib/priceChartGeometry.ts` y `src/components/PriceHistoryChart.tsx` (depende de H1)
+### H5 — Gráfica: `src/lib/priceChartGeometry.ts` y `src/components/PriceHistoryChart.tsx` (depende de H1 y de `formatIsoDateEs`/`formatMilliEuro` de H4)
 
 **priceChartGeometry.ts** (puro):
 

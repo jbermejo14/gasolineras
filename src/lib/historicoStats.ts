@@ -21,9 +21,13 @@ const YEAR_AGO_TARGET_WEEKS = 52;
 const YEAR_AGO_MIN_WEEKS = 50;
 const YEAR_AGO_MAX_WEEKS = 54;
 const PERCENT_FACTOR = 100;
-const PERCENT_DECIMALS = 10;
+const ONE_DECIMAL_FACTOR = 10;
 const MILLIS_PER_CENT = 10;
-const CENT_DECIMALS = 10;
+
+const HISTORICO_STATS_INTRO_FUELS: { fuel: HistoryFuel; label: string }[] = [
+  { fuel: 'gasolina95', label: 'la gasolina 95' },
+  { fuel: 'diesel', label: 'el diésel' },
+];
 
 const MONTH_NAMES_ES = [
   'enero',
@@ -59,6 +63,11 @@ export function formatIsoDateEs(iso: string): string {
   return `${Number(match[3])} de ${month} de ${match[1]}`;
 }
 
+/** Redondea a un decimal sobre el valor absoluto (simétrico respecto al cero): -6,25 → -6,3. */
+function historicoStatsRoundOneDecimal(value: number): number {
+  return Math.sign(value) * (Math.round(Math.abs(value) * ONE_DECIMAL_FACTOR) / ONE_DECIMAL_FACTOR);
+}
+
 function historicoStatsWeeksBetween(fromIso: string, toIso: string): number {
   return (Date.parse(toIso) - Date.parse(fromIso)) / MILLIS_PER_WEEK;
 }
@@ -79,6 +88,7 @@ function historicoStatsYearAgo(weeks: readonly string[], values: FuelSeries, lat
     const gap = historicoStatsWeeksBetween(weeks[index], weeks[latestIndex]);
     if (gap < YEAR_AGO_MIN_WEEKS || gap > YEAR_AGO_MAX_WEEKS) continue;
     const distance = Math.abs(gap - YEAR_AGO_TARGET_WEEKS);
+    // Con empate de distancia gana el más antiguo: el bucle avanza en el tiempo y solo sustituye si mejora estrictamente.
     if (distance < bestDistance) {
       bestDistance = distance;
       best = { date: weeks[index], value };
@@ -132,8 +142,7 @@ export function summarizeSeries(weeks: readonly string[], values: FuelSeries): S
   const yearAgo = latest ? historicoStatsYearAgo(weeks, values, latestIndex) : null;
   const changePct =
     latest && yearAgo
-      ? Math.round(((latest.value - yearAgo.value) / yearAgo.value) * PERCENT_FACTOR * PERCENT_DECIMALS) /
-        PERCENT_DECIMALS
+      ? historicoStatsRoundOneDecimal(((latest.value - yearAgo.value) / yearAgo.value) * PERCENT_FACTOR)
       : null;
   return {
     latest,
@@ -143,11 +152,6 @@ export function summarizeSeries(weeks: readonly string[], values: FuelSeries): S
     yearlyAverages: historicoStatsYearlyAverages(weeks, values),
   };
 }
-
-const HISTORICO_STATS_INTRO_FUELS: { fuel: HistoryFuel; label: string }[] = [
-  { fuel: 'gasolina95', label: 'la gasolina 95' },
-  { fuel: 'diesel', label: 'el diésel' },
-];
 
 interface HistoricoStatsFuelInfo {
   label: string;
@@ -160,7 +164,7 @@ function historicoStatsSubject(kind: AreaKind, name: string): string {
     case 'espana':
       return 'En España';
     case 'comunidad':
-      return `En la comunidad de ${name}`;
+      return `En ${name}`;
     case 'provincia':
       return `En la provincia de ${name}`;
     case 'marca':
@@ -206,11 +210,12 @@ function historicoStatsYearSentence(infos: HistoricoStatsFuelInfo[]): string | n
 function historicoStatsMaxSentence(infos: HistoricoStatsFuelInfo[]): string | null {
   const parts = infos.flatMap((info) =>
     info.summary.max
-      ? [`${info.label} fue de ${formatMilliEuro(info.summary.max.value)} el ${formatIsoDateEs(info.summary.max.date)}`]
+      ? [`de ${formatMilliEuro(info.summary.max.value)} el ${formatIsoDateEs(info.summary.max.date)} en ${info.label}`]
       : [],
   );
   if (parts.length === 0) return null;
-  return `El máximo histórico de ${historicoStatsJoin(parts)}.`;
+  const lead = parts.length === 1 ? 'El máximo histórico fue' : 'Los máximos históricos fueron';
+  return `${lead} ${historicoStatsJoin(parts)}.`;
 }
 
 function historicoStatsSpainCents(
@@ -223,7 +228,7 @@ function historicoStatsSpainCents(
   const spainValue = spain.series[info.fuel].avg[weeks.indexOf(latest.date)];
   if (spainValue === null || spainValue === undefined) return null;
   const cents = (latest.value - spainValue) / MILLIS_PER_CENT;
-  const rounded = Math.round(cents * CENT_DECIMALS) / CENT_DECIMALS;
+  const rounded = historicoStatsRoundOneDecimal(cents);
   if (rounded === 0) return `${info.label} está en la media nacional`;
   const direction = rounded > 0 ? 'por encima' : 'por debajo';
   return `${info.label} está ${historicoStatsDecimal(Math.abs(rounded))} céntimos ${direction} de la media nacional`;

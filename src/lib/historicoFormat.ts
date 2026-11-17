@@ -61,6 +61,7 @@ const MILLIS_PER_EURO = 1000;
 const MONDAY_WEEKDAY = 1;
 const DAYS_PER_WEEK = 7;
 const MILLIS_PER_DAY = 86_400_000;
+const ISO_DATE_LENGTH = 10;
 const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 export function priceToMilli(price: number): PriceMilli {
@@ -79,13 +80,18 @@ function historicoParseIso(iso: string): RegExpExecArray {
   return match;
 }
 
-function historicoIsoToUtcMillis(iso: string): number {
-  const match = historicoParseIso(iso);
-  return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+function historicoUtcMillisToIso(millis: number): string {
+  return new Date(millis).toISOString().slice(0, ISO_DATE_LENGTH);
 }
 
-function historicoUtcMillisToIso(millis: number): string {
-  return new Date(millis).toISOString().slice(0, 10);
+function historicoIsoToUtcMillis(iso: string): number {
+  const match = historicoParseIso(iso);
+  const millis = Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  // Date.UTC desborda las fechas imposibles (31 de febrero): se detectan al reformatear.
+  if (historicoUtcMillisToIso(millis) !== iso) {
+    throw new RangeError(`Fecha no válida "${iso}": no existe en el calendario.`);
+  }
+  return millis;
 }
 
 /**
@@ -94,6 +100,9 @@ function historicoUtcMillisToIso(millis: number): string {
  */
 export function listMondays(fromIso: string, toDate: Date): string[] {
   const start = historicoIsoToUtcMillis(fromIso);
+  if (Number.isNaN(toDate.getTime())) {
+    throw new RangeError('La fecha final no es válida (Invalid Date).');
+  }
   if (new Date(start).getUTCDay() !== MONDAY_WEEKDAY) {
     throw new RangeError(`La fecha inicial ${fromIso} no es lunes.`);
   }
@@ -107,11 +116,13 @@ export function listMondays(fromIso: string, toDate: Date): string[] {
 
 /** '2016-01-04' → '04-01-2016' (formato del endpoint de MITECO). */
 export function isoToMitecoDate(iso: string): string {
+  historicoIsoToUtcMillis(iso);
   const match = historicoParseIso(iso);
   return `${match[3]}-${match[2]}-${match[1]}`;
 }
 
 export function yearOfIso(iso: string): number {
+  historicoIsoToUtcMillis(iso);
   return Number(historicoParseIso(iso)[1]);
 }
 
@@ -145,7 +156,13 @@ function historicoStationYearSeries(
 ): FuelSeries {
   const encoded = file.stations[stationId]?.[fuel];
   if (!encoded) return file.weeks.map(() => null);
-  return decodeDeltaSeries(encoded);
+  const decoded = decodeDeltaSeries(encoded);
+  if (decoded.length !== file.weeks.length) {
+    throw new RangeError(
+      `Serie de longitud ${decoded.length} en la gasolinera ${stationId}, año ${file.year}, carburante ${fuel}: se esperaban ${file.weeks.length} semanas.`
+    );
+  }
+  return decoded;
 }
 
 /**

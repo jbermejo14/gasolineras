@@ -124,3 +124,39 @@ test('RangeError si el tamaño no supera el relleno', () => {
   assert.throws(() => buildChartGeometry(chartInput({ width: 70 })), RangeError);
   assert.throws(() => buildChartGeometry(chartInput({ height: 40 })), RangeError);
 });
+
+test('un punto aislado entre nulls lleva un trazo mínimo para ser visible', () => {
+  const geometry = buildChartGeometry(
+    chartInput({ series: [{ fuel: 'diesel', values: [1500, null, 1600, null, 1700] }] })
+  );
+  const d = geometry.paths[0].d;
+  assert.equal((d.match(/M/g) ?? []).length, 3);
+  assert.equal((d.match(/h0\.01/g) ?? []).length, 3);
+  assert.equal((d.match(/L/g) ?? []).length, 0);
+});
+
+test('un tramo de varios puntos no lleva trazo mínimo', () => {
+  const geometry = buildChartGeometry(
+    chartInput({ series: [{ fuel: 'diesel', values: [1500, 1600, null, 1700, 1600] }] })
+  );
+  assert.ok(!geometry.paths[0].d.includes('h0.01'));
+});
+
+test('pasos grandes: rango de 0,60 a 3,40 € mantiene 4-6 marcas que cubren los datos', () => {
+  const geometry = buildChartGeometry(
+    chartInput({ series: [{ fuel: 'gasolina95', values: [600, 3400, 600, 3400, 600] }] })
+  );
+  const ticks = geometry.yTicks;
+  assert.ok(ticks.length >= 4 && ticks.length <= 6, `${ticks.length} marcas`);
+  assert.ok(ticks[0].value <= 600 && ticks[ticks.length - 1].value >= 3400);
+});
+
+test('dominio plano: todos los valores iguales dan entre 4 y 6 marcas que incluyen el valor', () => {
+  const geometry = buildChartGeometry(
+    chartInput({ series: [{ fuel: 'gasolina95', values: [1500, 1500, 1500, 1500, 1500] }] })
+  );
+  const ticks = geometry.yTicks;
+  assert.ok(ticks.length >= 4 && ticks.length <= 6, `${ticks.length} marcas`);
+  assert.ok(ticks[0].value <= 1500 && ticks[ticks.length - 1].value >= 1500);
+  assert.ok(geometry.pointAt(0, 'gasolina95') !== null);
+});

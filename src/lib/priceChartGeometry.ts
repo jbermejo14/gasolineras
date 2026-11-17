@@ -32,6 +32,8 @@ const PRICE_CHART_MONTHS_PER_YEAR = 12;
 const PRICE_CHART_MIN_X_TICK_GAP = 30;
 const PRICE_CHART_MILLIS_PER_EURO = 1000;
 const PRICE_CHART_COORD_DECIMALS = 2;
+/** Trazo horizontal mínimo que, con extremo redondeado, hace visible un punto aislado entre nulls. */
+const PRICE_CHART_ISOLATED_POINT_STROKE = 'h0.01';
 const PRICE_CHART_MONTH_LABELS: readonly string[] = [
   'ene',
   'feb',
@@ -108,17 +110,15 @@ function priceChartRound(value: number): string {
 }
 
 function priceChartPathData(points: ({ x: number; y: number } | null)[]): string {
-  let d = '';
-  let drawing = false;
-  for (const point of points) {
-    if (point === null) {
-      drawing = false;
-      continue;
-    }
-    d += `${drawing ? 'L' : 'M'}${priceChartRound(point.x)} ${priceChartRound(point.y)} `;
-    drawing = true;
-  }
-  return d.trim();
+  const commands: string[] = [];
+  points.forEach((point, index) => {
+    if (point === null) return;
+    const continuing = index > 0 && points[index - 1] !== null;
+    commands.push(`${continuing ? 'L' : 'M'}${priceChartRound(point.x)} ${priceChartRound(point.y)}`);
+    const isolated = !continuing && (index === points.length - 1 || points[index + 1] === null);
+    if (isolated) commands.push(PRICE_CHART_ISOLATED_POINT_STROKE);
+  });
+  return commands.join(' ');
 }
 
 function priceChartMonthIndex(iso: string): number {

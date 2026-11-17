@@ -97,7 +97,7 @@ function historicoBuildDisplayName(name: string): string {
 export function buildProvinceTable(listing: readonly Record<string, unknown>[]): Map<string, ProvinceInfo> {
   const table = new Map<string, ProvinceInfo>();
   for (const item of listing) {
-    const idProvincia = historicoBuildText(item.IDPovincia ?? item.IDProvincia);
+    const idProvincia = historicoBuildText(item.IDPovincia || item.IDProvincia);
     const rawName = historicoBuildText(item.Provincia);
     if (!idProvincia || !rawName) continue;
     table.set(idProvincia, {
@@ -176,6 +176,8 @@ export class AreaHistoryAccumulator {
   private readonly provinces: ReadonlyMap<string, ProvinceInfo>;
   private readonly areas = new Map<string, HistoricoBuildAreaTotals>();
   private readonly seenWeeks = new Set<number>();
+  // Caché rótulo → clave de marca: evita repetir la detección por cada registro de cada semana.
+  private readonly brandKeyByLabel = new Map<string, string | null>();
 
   constructor(weeks: readonly string[], provinces: ReadonlyMap<string, ProvinceInfo>) {
     this.weeks = [...weeks];
@@ -241,9 +243,17 @@ export class AreaHistoryAccumulator {
     if (comunidad) keys.push(historicoBuildAreaKey('comunidad', comunidad.slug));
     const province = this.provinces.get(station.idProvincia);
     if (province) keys.push(historicoBuildAreaKey('provincia', province.slug));
-    const brandKey = historicoBuildBrandKey(getStationBrand(station.rotulo));
+    const brandKey = this.brandKeyFor(station.rotulo);
     if (brandKey) keys.push(historicoBuildAreaKey('marca', brandKey));
     for (const key of keys) this.addPrices(this.areas.get(key), station, index);
+  }
+
+  private brandKeyFor(label: string): string | null {
+    const cached = this.brandKeyByLabel.get(label);
+    if (cached !== undefined) return cached;
+    const brandKey = historicoBuildBrandKey(getStationBrand(label));
+    this.brandKeyByLabel.set(label, brandKey);
+    return brandKey;
   }
 
   private addPrices(totals: HistoricoBuildAreaTotals | undefined, station: WeekStationRecord, index: number): void {
@@ -301,12 +311,21 @@ export function buildStationPartitionsForYear(
   weeksOfYear: readonly string[],
   snapshots: readonly WeekSnapshot[]
 ): StationPartitionFile[] {
+  const foreignWeek = weeksOfYear.find((week) => yearOfIso(week) !== year);
+  if (foreignWeek !== undefined) {
+    throw new RangeError(`La semana ${foreignWeek} de weeksOfYear no pertenece al año ${year}.`);
+  }
   const byProvince = new Map<string, Map<string, HistoricoBuildStationSeries>>();
+  const seenDates = new Set<string>();
   for (const snapshot of snapshots) {
     const index = weeksOfYear.indexOf(snapshot.date);
     if (index < 0 || yearOfIso(snapshot.date) !== year) {
       throw new RangeError(`La semana ${snapshot.date} no pertenece a las semanas del año ${year}.`);
     }
+    if (seenDates.has(snapshot.date)) {
+      throw new RangeError(`La semana ${snapshot.date} aparece repetida en los snapshots.`);
+    }
+    seenDates.add(snapshot.date);
     for (const station of snapshot.stations) {
       if (!station.idProvincia) continue;
       const series = historicoBuildStationSeriesFor(byProvince, station, weeksOfYear.length);

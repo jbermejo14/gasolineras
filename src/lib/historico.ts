@@ -15,19 +15,19 @@ function historicoResolvePath(...segments: string[]): string {
 
 /** Lee y cachea un JSON; devuelve null si el fichero no existe y lanza si no es JSON válido. */
 function historicoReadJson<T>(filePath: string): T | null {
-  if (historicoFileCache.has(filePath)) return historicoFileCache.get(filePath) as T | null;
-  let parsed: unknown = null;
-  if (fs.existsSync(filePath)) {
-    const raw = fs.readFileSync(filePath, 'utf8');
-    try {
-      parsed = JSON.parse(raw);
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error);
-      throw new Error(`El fichero ${filePath} no contiene JSON válido (${reason}). ${HISTORICO_REGENERATE_HINT}`);
-    }
+  if (historicoFileCache.has(filePath)) return historicoFileCache.get(filePath) as T;
+  // Solo se cachean ficheros encontrados: así un fichero generado después se detecta sin reiniciar.
+  if (!fs.existsSync(filePath)) return null;
+  const raw = fs.readFileSync(filePath, 'utf8');
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`El fichero ${filePath} no contiene JSON válido (${reason}). ${HISTORICO_REGENERATE_HINT}`);
   }
   historicoFileCache.set(filePath, parsed);
-  return parsed as T | null;
+  return parsed as T;
 }
 
 /** Índice del histórico, o null si todavía no se ha generado. */
@@ -41,7 +41,8 @@ export function getAreasByKind(kind: AreaKind): AreaIndexEntry[] {
   return index ? index.areas.filter((area) => area.kind === kind) : [];
 }
 
-/** Histórico completo de un área, o null si su fichero no existe. */
+/** Histórico completo de un área, o null si el slug no está en el índice o su fichero no existe. */
 export function loadAreaHistory(kind: AreaKind, slug: string): AreaHistoryFile | null {
+  if (!getAreasByKind(kind).some((area) => area.slug === slug)) return null;
   return historicoReadJson<AreaHistoryFile>(historicoResolvePath(HISTORICO_AREAS_DIR, kind, `${slug}.json`));
 }
