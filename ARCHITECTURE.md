@@ -1,7 +1,8 @@
 # ARCHITECTURE — Gasolineras España
 
 - **Parte 1** — Mapa completo con agrupación por zoom y versión móvil (implementada).
-- **Parte 2** — Histórico de precios desde 2016 (al final del documento).
+- **Parte 2** — Histórico de precios desde 2016.
+- **Parte 3** — Textos legales, consentimiento de cookies y marca Ododex.
 
 # Parte 1 — Mapa completo con agrupación por zoom y versión móvil
 
@@ -595,3 +596,66 @@ El bucket R2 necesita acceso público (dominio propio o `r2.dev`) y CORS que per
 - Gráfica a ancho completo de la tarjeta; en móvil 260 px de alto; botones de carburante y rango en filas desplazables en horizontal (`.scrollbar-none`), 40 px de alto.
 - Tarjetas de cifras en rejilla de 2 columnas en móvil y 4 en escritorio.
 - Tabla anual con desplazamiento horizontal dentro de su contenedor en móvil.
+
+---
+
+# Parte 3 — Textos legales, consentimiento de cookies y marca Ododex
+
+## L.1 Objetivo y alcance
+
+### Qué hace
+
+- Añade las páginas **Aviso legal** (`/aviso-legal`), **Privacidad** (`/privacidad`) y **Cookies** (`/cookies`), con los datos del titular leídos de `config/titular.json`, igual que calculadora-impuestos (Ododex).
+- Prepara la web para Google AdSense: carga el script solo si `NEXT_PUBLIC_ADSENSE_CLIENT` es válida, publica `/ads.txt` y añade en el pie el botón **"Configurar cookies"**. El aviso de consentimiento (IAB TCF v2.2, certificado por Google) lo sirve el propio script de AdSense y se configura en la consola de AdSense (Privacidad y mensajes); no hay banner propio.
+- Quita las frases que dan a entender que la web es oficial o está respaldada por el Ministerio, cambia la marca de los títulos a **Ododex** y añade el aviso de exactitud de precios.
+- Sirve el CSS de Leaflet desde la propia web (hoy viene de `unpkg.com`, un tercero que recibe la IP del visitante).
+
+### Qué no hace
+
+- No coloca bloques de anuncios en las páginas (solo el script; con los anuncios automáticos de AdSense o bloques que se decidirán aparte).
+- No cambia el proveedor de teselas del mapa (pendiente aparte; la política de privacidad declara los actuales).
+- No es asesoramiento jurídico: los textos siguen el modelo de calculadora-impuestos y conviene que los revise un profesional.
+
+## L.2 Módulos
+
+### L1 — `src/lib/legal.ts` y `config/` (datos del titular)
+
+- Port literal de `calculadora-impuestos/lib/legal.ts` (mismos tipos `Titular`/`TipoTitular`, `getTitular`, `ficheroTitular`, `camposPendientes`, `valorOPendiente`, `FECHA_TEXTOS_LEGALES`), adaptando solo comillas e imports al estilo del proyecto.
+- `config/titular.example.json` (en git, campos vacíos) y `config/titular.json` en `.gitignore` (datos personales; sin él las páginas muestran `[pendiente: campo]`).
+- **Aceptación:** `tests/legal.test.ts` con directorio temporal: lee el real si existe y la plantilla si no; error claro con tipo inválido o campo ausente; `camposPendientes` (registroMercantil solo para empresa); `valorOPendiente`.
+
+### L2 — Páginas legales
+
+- `src/app/aviso-legal/page.tsx`, `src/app/privacidad/page.tsx`, `src/app/cookies/page.tsx`: estructura y tono de las de calculadora-impuestos (`robots: { index: false, follow: true }`, canonical, breadcrumbs, fecha de revisión), con estilos de gasolineras (tarjeta `--bg-card`, tipografía existente). Contenido adaptado a esta web:
+  - **Aviso legal:** titular (LSSI art. 10); objeto (comparador de precios de carburantes y su histórico); **fuente de los datos**: Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO), reutilizados según la normativa de reutilización de la información del sector público, citando fuente y fecha, **sin vinculación ni respaldo del Ministerio**; **exactitud**: los precios son los comunicados por las estaciones a MITECO y pueden no coincidir con el surtidor; el histórico es el precio de cada lunes; **marcas**: nombres y logotipos pertenecen a sus titulares y se usan solo para identificar la estación; propiedad intelectual del sitio; mapas © OpenStreetMap contributors y Esri; legislación española.
+  - **Privacidad:** responsable (titular); no hay registro de usuarios ni formularios; **"Cerca de mí"**: la ubicación se usa solo en el navegador para calcular distancias y no se envía a ningún servidor; **datos técnicos** que reciben terceros al cargar recursos (IP, navegador): proveedores de teselas del mapa (OpenStreetMap, Esri), almacenamiento del histórico por gasolinera (Cloudflare R2) y, si está activado, Google AdSense (con su base legal: consentimiento); conservación, derechos (acceso, rectificación, supresión, oposición, limitación, portabilidad) por correo al titular y reclamación ante la AEPD.
+  - **Cookies:** técnicas/preferencias: `localStorage` `ododex-theme` (tema claro/oscuro, exenta de consentimiento por ser una preferencia pedida por el usuario); publicidad: cookies de Google AdSense, solo con consentimiento mediante el aviso de Google; cómo cambiar la elección ("Configurar cookies" en el pie) y cómo borrarlas en el navegador. Si AdSense no está configurado, la página lo dice y omite el apartado de publicidad.
+
+### L3 — AdSense y consentimiento
+
+- `src/components/AdSenseScript.tsx` y `src/components/ConsentSettingsButton.tsx`: port de calculadora-impuestos (validación `ca-pub-` + 16 dígitos, `next/script` `afterInteractive`, botón que llama a `googlefc.showRevocationMessage`).
+- `src/app/layout.tsx`: incluye `<AdSenseScript />`.
+- `src/app/ads.txt/route.ts`: `GET` devuelve `text/plain` con `google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0` si hay cliente válido; si no, 404. `dynamic = 'force-static'`.
+- `src/components/Footer.tsx`: enlaces Aviso legal, Privacidad, Cookies y, si hay cliente AdSense, el botón "Configurar cookies"; texto de fuente: "Datos: Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO). Ododex no está vinculado al Ministerio." y "Los precios pueden no coincidir con los del surtidor."
+- `.env.example`: `NEXT_PUBLIC_ADSENSE_CLIENT=` documentada.
+- **Aceptación:** `tests/adsense.test.ts` para la validación del identificador y el contenido de `ads.txt` (función pura exportada `buildAdsTxt(client)`).
+
+### L4 — Marca y textos
+
+- `src/lib/site.ts`: `SITE_NAME = 'Ododex'` (ya existe).
+- `src/app/layout.tsx`: plantilla de título `'%s | Ododex'`, `openGraph.siteName: 'Ododex'`; título por defecto "Precio de la gasolina hoy en España: gasolineras más baratas | Ododex".
+- Quitar en todas las páginas y metadatos las expresiones "Datos verificados del Ministerio", "(MITECO)" usado como marca en títulos, "Fuente oficial" y similares que sugieran carácter oficial; sustituir por "Datos oficiales de MITECO" (los datos sí son oficiales; la web no). Las páginas cuyo `title` ya termina en "| Precios MITECO" se dejan si solo describen la fuente.
+- Leaflet: CSS importado desde el paquete (`import 'leaflet/dist/leaflet.css'` en el componente cliente del mapa o en `layout.tsx`) y eliminado el `<link>` a unpkg.
+
+## L.3 Orden
+
+1. L1 + L3 + L4 (un encargo; ficheros disjuntos de L2 salvo `Footer.tsx`, que lo hace este).
+2. L2.
+3. Verificación en pantalla (claro/oscuro, móvil) y commit.
+
+## L.4 Configuración
+
+| Variable / fichero | Uso | Por defecto |
+|---|---|---|
+| `config/titular.json` | Datos del titular para las páginas legales | Si falta, se usa `config/titular.example.json` y se muestran marcadores |
+| `NEXT_PUBLIC_ADSENSE_CLIENT` | Identificador de editor de AdSense (`ca-pub-` + 16 dígitos) | Vacío: sin AdSense, sin `ads.txt` y sin botón "Configurar cookies" |
