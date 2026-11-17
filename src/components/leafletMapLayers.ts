@@ -3,10 +3,12 @@ import type { FuelType } from '@/lib/miteco';
 import type { EstacionLigera } from '@/lib/stationPayload';
 import {
   CLUSTER_CELL_SIZE_PX,
+  CLUSTER_MIN_SEPARATION_PX,
   CLUSTERING_MAX_ZOOM,
   VIEWPORT_PADDING_RATIO,
   clusterPoints,
   filterPointsInBounds,
+  mergeOverlappingClusters,
   minNonNull,
   padBounds,
   shouldCluster,
@@ -108,7 +110,9 @@ function buildClusterEntries(params: MarkerSyncParams, visible: EstacionLigera[]
   const { map, fuel, highlightStationId } = params;
   const highlighted = visible.filter((station) => station.id === highlightStationId);
   const clusterable = visible.filter((station) => station.id !== highlightStationId);
-  const clusters = clusterPoints(clusterable, (lat, lon) => map.project([lat, lon], zoom), CLUSTER_CELL_SIZE_PX);
+  const project = (lat: number, lon: number) => map.project([lat, lon], zoom);
+  const cells = clusterPoints(clusterable, project, CLUSTER_CELL_SIZE_PX);
+  const clusters = mergeOverlappingClusters(cells, project, CLUSTER_MIN_SEPARATION_PX);
 
   const entries = clusters.map((cluster): MarkerEntry => {
     if (cluster.count === 1) return buildStationEntry(params, cluster.members[0]);

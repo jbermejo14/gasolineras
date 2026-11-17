@@ -9,7 +9,8 @@ Genera páginas indexables en el servidor para **52 provincias**, **~3.250 munic
 ## 🚀 Arquitectura y Características
 
 1. **SEO Programático Completo**:
-   - `/`: Buscador interactivo nacional, mapa y cinta de estadísticas nacionales (mínimo, promedio, máximo y ahorro de depósito de 50L).
+   - `/`: Buscador interactivo nacional, mapa y cinta de estadísticas nacionales (mínimo, promedio, máximo y ahorro de depósito de 50L). El buscador descarga las estaciones desde `GET /api/estaciones` (JSON ligero, cacheado 30 minutos) en lugar de incrustarlas en el HTML.
+   - Mapa del buscador: muestra **todas** las gasolineras que cumplen los filtros. Con zoom lejano se agrupan en burbujas (número de estaciones y precio mínimo); al acercarse (zoom 15 o más) aparecen todas sueltas con su precio. Solo se pintan las de la zona visible. La agrupación es una rejilla en píxeles propia (`src/lib/stationClustering.ts`), sin dependencias extra.
    - `/provincia/[provincia]`: Las más baratas por combustible, medias provinciales vs nacionales y directorio de municipios.
    - `/provincia/[provincia]/[municipio]`: Gasolineras más baratas hoy en el municipio, tabla ordenada por precio legible sin JavaScript, comparativa frente a la provincia, mapa municipal y municipios cercanos.
    - `/gasolinera/[id]-[slug]`: Ficha técnica de la estación con todos los carburantes disponibles, comparativa de ahorro, horario y mapa "Cómo llegar" con GPS.
@@ -38,12 +39,15 @@ Genera páginas indexables en el servidor para **52 provincias**, **~3.250 munic
    - Logos corporativos optimizados en formato **WebP** servidos con `next/image` (~100 KB en total frente a 440 KB originales).
    - Carga dinámica del mapa Leaflet (`ssr: false`) en componentes cliente independientes.
    - Soporte nativo de Modo Oscuro y Modo Claro con paleta Negro y Naranja persistente en `localStorage`.
+   - Diseño adaptado a móvil (desde 360 px): filas de filtros desplazables en horizontal, controles táctiles de 40 px, campos de 16 px para evitar el zoom automático de iOS y mapa al 70 % del alto de pantalla.
+
+El diseño de estos cambios está en [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
 ## 🛠️ Instalación y Requisitos
 
-- **Node.js**: v20 o v22+
+- **Node.js**: v22.6 o superior (las pruebas usan `--experimental-strip-types` para ejecutar TypeScript)
 - **npm**: 10+
 
 ```bash
@@ -75,7 +79,7 @@ REFRESH_SECRET=tu-clave-secreta-para-recarga-manual
 
 ## 🧪 Pruebas Unitarias Sin Red
 
-Ejecuta el conjunto de pruebas unitarias basadas en un fixture real reducido de MITECO (`tests/miteco.test.js`):
+Ejecuta el conjunto de pruebas unitarias (`tests/*.test.js` y `tests/*.test.ts`), basadas en un fixture real reducido de MITECO y en datos mínimos inventados:
 
 ```bash
 npm test
@@ -88,6 +92,15 @@ Pruebas cubiertas:
 - Cálculo de medias y mínimos municipales y provinciales.
 - Comprobación de 404 para slugs no registrados.
 - Simulación de generación del sitemap.
+- Agrupación de estaciones del mapa por rejilla y fusión de burbujas solapadas (`tests/stationClustering.test.ts`).
+- Formato ligero de `/api/estaciones` (`tests/stationPayload.test.ts`).
+- Filtrado, ordenación y estadísticas del buscador (`tests/gasFinderLogic.test.ts`).
+
+Comprobación de tipos de todo el proyecto:
+
+```bash
+npx tsc --noEmit
+```
 
 ---
 

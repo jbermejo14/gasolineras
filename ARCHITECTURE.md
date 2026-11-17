@@ -32,7 +32,9 @@ Las rutas son relativas a la raíz del proyecto. Los módulos de `src/lib` que s
 
 ```ts
 /** Tamaño en píxeles de cada celda de la rejilla de agrupación. */
-export const CLUSTER_CELL_SIZE_PX = 64;
+export const CLUSTER_CELL_SIZE_PX = 80;
+/** Distancia mínima en píxeles entre centroides de burbujas; más cerca se fusionan. */
+export const CLUSTER_MIN_SEPARATION_PX = 56;
 /** Zoom máximo al que se agrupa. Con zoom mayor, todas las estaciones se muestran sueltas. */
 export const CLUSTERING_MAX_ZOOM = 14;
 /** Margen extra (fracción del tamaño visible) para no recortar marcadores en los bordes al desplazar. */
@@ -90,6 +92,20 @@ export function clusterPoints<T extends GeoPoint>(
   cellSizePx: number
 ): PointCluster<T>[];
 
+/**
+ * Fusiona grupos cuyos centroides proyectados quedan a menos de minSeparationPx.
+ * Algoritmo voraz de una pasada: recorre los grupos de mayor a menor count (empate: orden de entrada);
+ * cada grupo se fusiona con el primer grupo ya aceptado a menos de minSeparationPx de su centroide,
+ * o se acepta como nuevo. Al fusionar se recalculan miembros, count, centroide (media de los miembros)
+ * y bounds; se conserva la key del grupo aceptado. Devuelve los grupos aceptados en el orden en que
+ * se aceptaron. No muta la entrada. Lanza RangeError si minSeparationPx < 0 o NaN.
+ */
+export function mergeOverlappingClusters<T extends GeoPoint>(
+  clusters: readonly PointCluster<T>[],
+  project: Projector,
+  minSeparationPx: number
+): PointCluster<T>[];
+
 /** Mínimo de los valores no nulos; null si no hay ninguno. */
 export function minNonNull(values: ReadonlyArray<number | null>): number | null;
 ```
@@ -100,6 +116,7 @@ export function minNonNull(values: ReadonlyArray<number | null>): number | null;
 - `filterPointsInBounds` incluye los bordes, excluye los de fuera y conserva el orden.
 - `shouldCluster(14) === true`, `shouldCluster(15) === false`.
 - `clusterPoints` con un proyector falso `(lat, lon) => ({ x: lon * 100, y: -lat * 100 })`: dos puntos en la misma celda forman un grupo con `count` 2, centroide y `bounds` correctos; puntos en celdas distintas forman grupos separados; lista vacía devuelve `[]`; `cellSizePx` 0 lanza `RangeError`.
+- `mergeOverlappingClusters`: fusiona grupos cercanos (count suma, centroide y bounds recalculados, key del mayor); no fusiona los alejados; el orden por count decide quién absorbe; lista vacía devuelve `[]`; no muta la entrada; separación negativa o NaN lanza `RangeError`; separación 0 no fusiona.
 - `minNonNull([null, 1.5, 1.2])` es 1.2; `minNonNull([null])` es null; `minNonNull([])` es null.
 
 ### Módulo 2 — `src/lib/stationPayload.ts` y `src/app/api/estaciones/route.ts` (datos ligeros)
@@ -169,7 +186,7 @@ interface LeafletMapProps {
 
 1. **Redibujado.** Una función `renderVisibleMarkers()` se ejecuta en `moveend` y `zoomend` del mapa (con un solo listener `moveend` basta, Leaflet lo emite tras el zoom) y cuando cambian `stations` o `selectedFuel`. Hace:
    - límites visibles `map.getBounds()` → `padBounds(…, VIEWPORT_PADDING_RATIO)` → `filterPointsInBounds`;
-   - si `shouldCluster(map.getZoom())`: `clusterPoints(visibles, (lat, lon) => map.project([lat, lon], zoom), CLUSTER_CELL_SIZE_PX)`; un grupo de 1 miembro se pinta como marcador individual;
+   - si `shouldCluster(map.getZoom())`: `clusterPoints(visibles, (lat, lon) => map.project([lat, lon], zoom), CLUSTER_CELL_SIZE_PX)` y después `mergeOverlappingClusters(grupos, mismo proyector, CLUSTER_MIN_SEPARATION_PX)` para fusionar burbujas solapadas; un grupo de 1 miembro se pinta como marcador individual;
    - si no: todos los visibles como marcadores individuales;
    - la estación `highlightStationId` nunca se agrupa: siempre marcador individual con popup abierto.
    - limpia y repinta la capa de marcadores (`layerGroup.clearLayers()`).
@@ -255,7 +272,7 @@ interface StationCardProps {
 ## 5. Diseño de interfaz
 
 - **Paleta:** la existente (negro y naranja `--orange-primary`, modo claro/oscuro con variables CSS).
-- **Mapa, zoom lejano:** burbujas naranjas translúcidas con borde naranja sólido; número en negrita; línea pequeña con el precio mínimo, p. ej. "1,234€" (oculta en la pequeña). Pequeña 40 px, mediana 52 px, grande 64 px.
+- **Mapa, zoom lejano:** burbujas naranjas translúcidas con borde naranja sólido; número en negrita; línea pequeña con el precio mínimo, p. ej. "1,234€" (oculta en la pequeña). Pequeña 34 px, mediana 46 px, grande 56 px.
 - **Mapa, zoom cercano:** pines de precio actuales.
 - **Móvil:** una columna; filtros desplazables en horizontal; mapa al 70 % del alto de la pantalla; conmutador Lista/Mapa a ancho completo.
 - **Estados del buscador:** cargando (esqueleto), error (mensaje + Reintentar), vacío (mensaje actual + Restablecer filtros), listo.

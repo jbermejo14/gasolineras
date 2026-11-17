@@ -10,9 +10,9 @@ interface ClusterSizeTier {
 
 /** Niveles de tamaño de burbuja, de menor a mayor; el último no tiene tope. */
 const CLUSTER_SIZE_TIERS: readonly ClusterSizeTier[] = [
-  { maxCountExclusive: 10, modifier: 'small', sizePx: 40 },
-  { maxCountExclusive: 100, modifier: 'medium', sizePx: 52 },
-  { maxCountExclusive: Infinity, modifier: 'large', sizePx: 64 },
+  { maxCountExclusive: 10, modifier: 'small', sizePx: 34 },
+  { maxCountExclusive: 100, modifier: 'medium', sizePx: 46 },
+  { maxCountExclusive: Infinity, modifier: 'large', sizePx: 56 },
 ];
 
 const PIN_ICON_SIZE: [number, number] = [60, 24];

@@ -170,7 +170,7 @@ body {
   white-space: nowrap;
 }
 
-/* En la burbuja pequeña (40 px) no cabe la línea de precio */
+/* En la burbuja pequeña (34 px) no cabe la línea de precio */
 .station-cluster--small .station-cluster__price {
   display: none;
 }
