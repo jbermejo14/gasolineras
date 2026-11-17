@@ -58,7 +58,7 @@ export function Header({ fechaMiteco }: HeaderProps) {
             <Fuel className="w-6 h-6 text-black" />
           </div>
           <div className="min-w-0">
-            <span className="block truncate text-base sm:text-xl font-extrabold tracking-tight text-[var(--text-main)] group-hover:text-[var(--orange-primary)] transition-colors">
+            <span className="block truncate text-sm sm:text-xl font-extrabold tracking-tight text-[var(--text-main)] group-hover:text-[var(--orange-primary)] transition-colors">
               GASOLINERAS <span className="text-[var(--orange-primary)]">ESPAÑA</span>
             </span>
             <p className="text-xs text-[var(--text-muted)] hidden sm:block">

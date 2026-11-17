@@ -143,8 +143,10 @@ body {
   display: none;
 }
 
-/* Burbujas de grupos de estaciones en el mapa */
-.station-cluster {
+/* Burbujas de grupos de estaciones en el mapa.
+   Selector con dos clases: leaflet.css se carga después y su `.leaflet-marker-icon { display: block }`
+   anularía el flex con un selector de una sola clase. */
+.leaflet-marker-icon.station-cluster {
   display: flex;
   flex-direction: column;
   align-items: center;
