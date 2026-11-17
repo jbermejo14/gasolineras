@@ -11,6 +11,8 @@ export const CLUSTER_MIN_SEPARATION_PX = 56;
 export const CLUSTERING_MAX_ZOOM = 14;
 /** Margen extra (fracción del tamaño visible) para no recortar marcadores en los bordes al desplazar. */
 export const VIEWPORT_PADDING_RATIO = 0.25;
+/** Mínimo de gasolineras para mostrar una burbuja; los grupos más pequeños se muestran como gasolineras sueltas. */
+export const CLUSTER_MIN_MEMBERS = 4;
 
 export interface GeoPoint {
   lat: number;
@@ -172,6 +174,30 @@ export function mergeOverlappingClusters<T extends GeoPoint>(
     target.pixel = project(target.cluster.lat, target.cluster.lon);
   }
   return accepted.map((entry) => entry.cluster);
+}
+
+/**
+ * Separa los grupos con menos de minMembers miembros: sus miembros pasan a `singles`
+ * (en orden de grupo y de miembro) y el resto se devuelve en `clusters`, también en orden.
+ * No muta la entrada. Lanza RangeError si minMembers no es un entero >= 1.
+ */
+export function splitSmallClusters<T extends GeoPoint>(
+  clusters: readonly PointCluster<T>[],
+  minMembers: number
+): { clusters: PointCluster<T>[]; singles: T[] } {
+  if (!Number.isInteger(minMembers) || minMembers < 1) {
+    throw new RangeError(`El mínimo de miembros debe ser un entero >= 1: ${minMembers}`);
+  }
+  const kept: PointCluster<T>[] = [];
+  const singles: T[] = [];
+  for (const cluster of clusters) {
+    if (cluster.count >= minMembers) {
+      kept.push(cluster);
+    } else {
+      singles.push(...cluster.members);
+    }
+  }
+  return { clusters: kept, singles };
 }
 
 /** Mínimo de los valores no nulos; null si no hay ninguno. */

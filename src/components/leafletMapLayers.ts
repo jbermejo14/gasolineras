@@ -3,6 +3,7 @@ import type { FuelType } from '@/lib/miteco';
 import type { EstacionLigera } from '@/lib/stationPayload';
 import {
   CLUSTER_CELL_SIZE_PX,
+  CLUSTER_MIN_MEMBERS,
   CLUSTER_MIN_SEPARATION_PX,
   CLUSTERING_MAX_ZOOM,
   VIEWPORT_PADDING_RATIO,
@@ -12,6 +13,7 @@ import {
   minNonNull,
   padBounds,
   shouldCluster,
+  splitSmallClusters,
   type PointCluster,
 } from '@/lib/stationClustering';
 import {
@@ -112,17 +114,18 @@ function buildClusterEntries(params: MarkerSyncParams, visible: EstacionLigera[]
   const clusterable = visible.filter((station) => station.id !== highlightStationId);
   const project = (lat: number, lon: number) => map.project([lat, lon], zoom);
   const cells = clusterPoints(clusterable, project, CLUSTER_CELL_SIZE_PX);
-  const clusters = mergeOverlappingClusters(cells, project, CLUSTER_MIN_SEPARATION_PX);
+  const merged = mergeOverlappingClusters(cells, project, CLUSTER_MIN_SEPARATION_PX);
+  const { clusters, singles } = splitSmallClusters(merged, CLUSTER_MIN_MEMBERS);
 
-  const entries = clusters.map((cluster): MarkerEntry => {
-    if (cluster.count === 1) return buildStationEntry(params, cluster.members[0]);
+  const clusterEntries = clusters.map((cluster): MarkerEntry => {
     const minPrice = minNonNull(cluster.members.map((member) => resolveStationPrice(member, fuel)));
     return {
       key: `c:${zoom}:${cluster.key}:${cluster.count}:${minPrice}`,
       create: () => createClusterMarker(params, cluster, minPrice),
     };
   });
-  return entries.concat(highlighted.map((station) => buildStationEntry(params, station)));
+  const stationEntries = singles.concat(highlighted).map((station) => buildStationEntry(params, station));
+  return clusterEntries.concat(stationEntries);
 }
 
 function buildEntries(params: MarkerSyncParams): MarkerEntry[] {

@@ -154,6 +154,59 @@ test('mergeOverlappingClusters con separación 0 no fusiona posiciones distintas
   assert.equal(mergeOverlappingClusters([a, b], fakeProject, 0).length, 2);
 });
 
+const SPLIT_MIN_MEMBERS = 4;
+
+/** Construye un grupo de `count` puntos en la misma posición, con clave propia. */
+function makeSizedCluster(key: string, count: number, lon: number) {
+  return makeTestCluster(key, Array.from({ length: count }, (): [number, number] => [0, lon]));
+}
+
+test('splitSmallClusters deja como sueltos los grupos de 1, 2 y 3 y conserva el de 4', () => {
+  const clusters = [
+    makeSizedCluster('one', 1, 0),
+    makeSizedCluster('two', 2, 1),
+    makeSizedCluster('three', 3, 2),
+    makeSizedCluster('four', 4, 3),
+  ];
+  const result = clustering.splitSmallClusters(clusters, SPLIT_MIN_MEMBERS);
+  assert.deepEqual(result.clusters.map((cluster: { key: string }) => cluster.key), ['four']);
+  assert.deepEqual(result.singles.map((point: TestPoint) => point.lon), [0, 1, 1, 2, 2, 2]);
+});
+
+test('splitSmallClusters con mínimo 1 no separa nada', () => {
+  const clusters = [makeSizedCluster('one', 1, 0), makeSizedCluster('two', 2, 1)];
+  const result = clustering.splitSmallClusters(clusters, 1);
+  assert.equal(result.clusters.length, 2);
+  assert.deepEqual(result.singles, []);
+});
+
+test('splitSmallClusters con lista vacía devuelve vacíos', () => {
+  assert.deepEqual(clustering.splitSmallClusters([], SPLIT_MIN_MEMBERS), { clusters: [], singles: [] });
+});
+
+test('splitSmallClusters conserva el orden de los grupos', () => {
+  const clusters = [makeSizedCluster('b', 5, 0), makeSizedCluster('a', 4, 1)];
+  const result = clustering.splitSmallClusters(clusters, SPLIT_MIN_MEMBERS);
+  assert.deepEqual(result.clusters.map((cluster: { key: string }) => cluster.key), ['b', 'a']);
+});
+
+test('splitSmallClusters no muta la entrada', () => {
+  const input = [makeSizedCluster('two', 2, 0), makeSizedCluster('four', 4, 1)];
+  const snapshot = structuredClone(input);
+  clustering.splitSmallClusters(input, SPLIT_MIN_MEMBERS);
+  assert.deepEqual(input, snapshot);
+});
+
+test('splitSmallClusters lanza RangeError si el mínimo no es un entero >= 1', () => {
+  for (const invalid of [0, -1, 1.5, Number.NaN]) {
+    assert.throws(() => clustering.splitSmallClusters([], invalid), RangeError);
+  }
+});
+
+test('CLUSTER_MIN_MEMBERS vale 4', () => {
+  assert.equal(clustering.CLUSTER_MIN_MEMBERS, 4);
+});
+
 test('minNonNull', () => {
   assert.equal(minNonNull([null, 1.5, 1.2]), 1.2);
   assert.equal(minNonNull([null]), null);

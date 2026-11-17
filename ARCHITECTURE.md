@@ -44,6 +44,8 @@ export const CLUSTER_MIN_SEPARATION_PX = 56;
 export const CLUSTERING_MAX_ZOOM = 14;
 /** Margen extra (fracción del tamaño visible) para no recortar marcadores en los bordes al desplazar. */
 export const VIEWPORT_PADDING_RATIO = 0.25;
+/** Mínimo de gasolineras para mostrar una burbuja; los grupos más pequeños se muestran como gasolineras sueltas. */
+export const CLUSTER_MIN_MEMBERS = 4;
 
 export interface GeoPoint {
   lat: number;
@@ -110,6 +112,16 @@ export function mergeOverlappingClusters<T extends GeoPoint>(
   project: Projector,
   minSeparationPx: number
 ): PointCluster<T>[];
+
+/**
+ * Separa los grupos con menos de minMembers miembros: sus miembros pasan a `singles`
+ * (en orden de grupo y de miembro) y el resto se devuelve en `clusters`, también en orden.
+ * No muta la entrada. Lanza RangeError si minMembers no es un entero >= 1.
+ */
+export function splitSmallClusters<T extends GeoPoint>(
+  clusters: readonly PointCluster<T>[],
+  minMembers: number
+): { clusters: PointCluster<T>[]; singles: T[] };
 
 /** Mínimo de los valores no nulos; null si no hay ninguno. */
 export function minNonNull(values: ReadonlyArray<number | null>): number | null;
@@ -191,7 +203,7 @@ interface LeafletMapProps {
 
 1. **Redibujado.** Una función `renderVisibleMarkers()` se ejecuta en `moveend` y `zoomend` del mapa (con un solo listener `moveend` basta, Leaflet lo emite tras el zoom) y cuando cambian `stations` o `selectedFuel`. Hace:
    - límites visibles `map.getBounds()` → `padBounds(…, VIEWPORT_PADDING_RATIO)` → `filterPointsInBounds`;
-   - si `shouldCluster(map.getZoom())`: `clusterPoints(visibles, (lat, lon) => map.project([lat, lon], zoom), CLUSTER_CELL_SIZE_PX)` y después `mergeOverlappingClusters(grupos, mismo proyector, CLUSTER_MIN_SEPARATION_PX)` para fusionar burbujas solapadas; un grupo de 1 miembro se pinta como marcador individual;
+   - si `shouldCluster(map.getZoom())`: `clusterPoints(visibles, (lat, lon) => map.project([lat, lon], zoom), CLUSTER_CELL_SIZE_PX)` y después `mergeOverlappingClusters(grupos, mismo proyector, CLUSTER_MIN_SEPARATION_PX)` para fusionar burbujas solapadas; un grupo de 1 miembro se pinta como marcador individual. Los grupos de menos de 4 gasolineras se muestran como pines sueltos;
    - si no: todos los visibles como marcadores individuales;
    - la estación `highlightStationId` nunca se agrupa: siempre marcador individual con popup abierto.
    - limpia y repinta la capa de marcadores (`layerGroup.clearLayers()`).
