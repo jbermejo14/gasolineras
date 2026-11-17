@@ -1,15 +1,14 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { HISTORY_START_DATE, yearOfIso } from '@/lib/historicoFormat';
+import { HISTORY_START_DATE, mergeStationPartitions, yearOfIso } from '@/lib/historicoFormat';
 import type { StationPartitionFile } from '@/lib/historicoFormat';
 import {
   hasAnyPrice,
   listMissingYears,
   listRecentYears,
   loadPartitions,
-  mergeStationHistory,
 } from '@/lib/stationHistoryLoader';
 import type { FetchPartition, StationHistoryMerged } from '@/lib/stationHistoryLoader';
 import { PriceHistoryChart } from '@/components/PriceHistoryChart';
@@ -30,12 +29,13 @@ const STATION_HISTORY_HTTP_NOT_FOUND = 404;
 const STATION_HISTORY_TRAILING_SLASHES = /\/+$/;
 const STATION_HISTORY_EMPTY_TEXT = 'No hay histórico para esta gasolinera';
 const STATION_HISTORY_ERROR_TEXT = 'No se pudo cargar el histórico de esta gasolinera.';
+const STATION_HISTORY_PARTIAL_ERROR_TEXT = 'No se pudieron cargar todos los años.';
 const STATION_HISTORY_SKELETON_CLASS = 'h-[260px] sm:h-[320px]';
 const STATION_HISTORY_BUTTON_CLASS =
   'min-h-11 px-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--orange-primary)] text-xs font-bold text-[var(--text-main)] transition-colors disabled:opacity-60';
 
 function stationHistoryBaseUrl(): string {
-  const base = process.env.NEXT_PUBLIC_HISTORICO_BASE_URL ?? STATION_HISTORY_DEFAULT_BASE_URL;
+  const base = process.env.NEXT_PUBLIC_HISTORICO_BASE_URL || STATION_HISTORY_DEFAULT_BASE_URL;
   return base.replace(STATION_HISTORY_TRAILING_SLASHES, '');
 }
 
@@ -62,6 +62,7 @@ export function StationHistory({
   const [scope, setScope] = useState<StationHistoryScope>('recent');
   const [attempt, setAttempt] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [partialError, setPartialError] = useState(false);
   const filesByYear = useRef(new Map<number, StationPartitionFile>());
   const requestedYears = useRef(new Set<number>());
 
@@ -86,13 +87,16 @@ export function StationHistory({
         if (controller.signal.aborted) return;
         files.forEach((file) => filesByYear.current.set(file.year, file));
         wanted.forEach((year) => requestedYears.current.add(year));
-        setMerged(mergeStationHistory(Array.from(filesByYear.current.values()), stationId));
+        setMerged(mergeStationPartitions(Array.from(filesByYear.current.values()), stationId));
+        setPartialError(false);
         setStatus('ready');
       } catch (error) {
         // Una petición fallida o una partición corrupta se muestra como error con "Reintentar".
         if (controller.signal.aborted) return;
         console.error('Error al cargar el histórico de la gasolinera', error);
-        setStatus('error');
+        // Con años ya cargados se conserva la gráfica y solo se avisa del fallo.
+        if (requestedYears.current.size > 0) setPartialError(true);
+        else setStatus('error');
       } finally {
         if (!controller.signal.aborted) setLoadingMore(false);
       }
@@ -103,7 +107,8 @@ export function StationHistory({
   }, [stationId, idProvincia, scope, attempt]);
 
   function stationHistoryRetry(): void {
-    setStatus('loading');
+    if (status === 'error') setStatus('loading');
+    setPartialError(false);
     setLoadingMore(scope === 'all');
     setAttempt((value) => value + 1);
   }
@@ -147,6 +152,15 @@ export function StationHistory({
           title={`Evolución del precio en ${stationName}`}
           defaultRange="all"
         />
+      )}
+
+      {partialError && (
+        <div role="alert" className="flex flex-wrap items-center gap-3 text-xs text-[var(--text-muted)]">
+          <span>{STATION_HISTORY_PARTIAL_ERROR_TEXT}</span>
+          <button type="button" onClick={stationHistoryRetry} className={STATION_HISTORY_BUTTON_CLASS}>
+            Reintentar
+          </button>
+        </div>
       )}
 
       {canShowAll && (

@@ -20,6 +20,9 @@ import { MITECO_URL_PROVINCIAS } from '../src/lib/miteco.ts';
 
 const MITECO_URL_HISTORICO_BASE =
   'https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestresHist';
+const MITECO_USER_AGENT = 'GasolinerasSEO/1.0';
+const EXIT_OK = 0;
+const EXIT_FAILURE = 1;
 const FETCH_TIMEOUT_MS = 120_000;
 const DOWNLOAD_CONCURRENCY = 2;
 const RETRY_DELAYS_SECONDS = [5, 15, 45];
@@ -155,7 +158,7 @@ async function historicoWithRetries<T>(label: string, operation: () => Promise<T
 
 async function historicoFetchJson(url: string): Promise<unknown> {
   const response = await fetch(url, {
-    headers: { Accept: 'application/json', 'User-Agent': 'GasolinerasSEO/1.0' },
+    headers: { Accept: 'application/json', 'User-Agent': MITECO_USER_AGENT },
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!response.ok) throw new Error(`HTTP ${response.status} ${response.statusText}`);
@@ -193,8 +196,7 @@ function historicoWriteFileAtomic(file: string, content: Buffer): void {
 }
 
 function historicoWriteJson(file: string, value: unknown): void {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(value));
+  historicoWriteFileAtomic(file, Buffer.from(JSON.stringify(value)));
 }
 
 function historicoSaveSnapshot(snapshot: WeekSnapshot): void {
@@ -202,7 +204,15 @@ function historicoSaveSnapshot(snapshot: WeekSnapshot): void {
 }
 
 function historicoLoadSnapshot(date: string): WeekSnapshot {
-  return JSON.parse(zlib.gunzipSync(fs.readFileSync(historicoCacheFile(date))).toString('utf8')) as WeekSnapshot;
+  const file = historicoCacheFile(date);
+  try {
+    return JSON.parse(zlib.gunzipSync(fs.readFileSync(file)).toString('utf8')) as WeekSnapshot;
+  } catch (error) {
+    throw new Error(
+      `La caché ${file} está corrupta o ilegible (${historicoErrorMessage(error)}). ` +
+        'Borra ese fichero y vuelve a ejecutar npm run historico.'
+    );
+  }
 }
 
 function historicoListCachedDates(): string[] {
@@ -250,9 +260,12 @@ async function historicoDownloadWeeks(missing: readonly string[]): Promise<Histo
 }
 
 /** Escribe el índice y los ficheros por área (solo sobrescribe); devuelve cuántos ficheros escribió. */
-function historicoBuildAreaFiles(weeks: readonly string[], provinces: ReturnType<typeof buildProvinceTable>): number {
+function historicoBuildAreaFiles(
+  weeks: readonly string[],
+  provinces: ReturnType<typeof buildProvinceTable>,
+  cached: ReadonlySet<string>
+): number {
   const accumulator = new AreaHistoryAccumulator(weeks, provinces);
-  const cached = new Set(historicoListCachedDates());
   for (const week of weeks) {
     if (cached.has(week)) accumulator.addWeek(historicoLoadSnapshot(week));
   }
@@ -274,8 +287,10 @@ function historicoGroupWeeksByYear(weeks: readonly string[]): Map<number, string
 }
 
 /** Escribe las particiones año a año, con solo los snapshots de ese año en memoria. */
-function historicoBuildPartitionFiles(weeks: readonly string[]): HistoricoWrittenPartition[] {
-  const cached = new Set(historicoListCachedDates());
+function historicoBuildPartitionFiles(
+  weeks: readonly string[],
+  cached: ReadonlySet<string>
+): HistoricoWrittenPartition[] {
   const written: HistoricoWrittenPartition[] = [];
   for (const [year, weeksOfYear] of historicoGroupWeeksByYear(weeks)) {
     const snapshots = weeksOfYear.filter((week) => cached.has(week)).map(historicoLoadSnapshot);
@@ -352,6 +367,11 @@ function historicoPrintSummary(
   if (upload) console.log(`- Ficheros subidos a R2: ${upload.uploaded} (fallidos: ${upload.failed})`);
 }
 
+/** Código de salida: fallo si falló alguna semana o alguna subida, para que un cron lo detecte. */
+export function resolveHistoricoExitCode(failedWeeks: number, failedUploads: number): number {
+  return failedWeeks > 0 || failedUploads > 0 ? EXIT_FAILURE : EXIT_OK;
+}
+
 async function historicoMain(): Promise<number> {
   const args = parseHistoricoArgs(process.argv.slice(2));
   historicoLoadEnvFile();
@@ -359,16 +379,18 @@ async function historicoMain(): Promise<number> {
 
   const until = args.until ? new Date(`${args.until}T00:00:00Z`) : new Date();
   const weeks = listMondays(HISTORY_START_DATE, until);
-  const missing = findMissingWeeks(weeks, historicoListCachedDates());
+  const cachedDates = new Set(historicoListCachedDates());
+  const missing = findMissingWeeks(weeks, cachedDates);
   console.log(`${weeks.length} semanas en total, ${missing.length} por descargar.`);
 
   const provinces = buildProvinceTable(await historicoFetchProvinceListing());
   const report = await historicoDownloadWeeks(missing);
 
   console.log('Construyendo agregados por área...');
-  const areaFiles = historicoBuildAreaFiles(weeks, provinces);
+  for (const date of report.downloaded) cachedDates.add(date);
+  const areaFiles = historicoBuildAreaFiles(weeks, provinces, cachedDates);
   console.log('Construyendo particiones por gasolinera...');
-  const partitions = historicoBuildPartitionFiles(weeks);
+  const partitions = historicoBuildPartitionFiles(weeks, cachedDates);
 
   let upload: HistoricoUploadReport | null = null;
   if (r2Config) {
@@ -376,7 +398,7 @@ async function historicoMain(): Promise<number> {
     upload = await historicoUploadPartitions(r2Config, selected);
   }
   historicoPrintSummary(report, areaFiles + partitions.length, upload);
-  return upload && upload.failed > 0 ? 1 : 0;
+  return resolveHistoricoExitCode(report.failed.length, upload?.failed ?? 0);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
@@ -386,7 +408,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
     },
     (error: unknown) => {
       console.error(`Error: ${historicoErrorMessage(error)}`);
-      process.exitCode = 1;
+      process.exitCode = EXIT_FAILURE;
     }
   );
 }

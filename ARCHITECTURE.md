@@ -555,7 +555,7 @@ Ficheros: `src/app/historico/page.tsx`, `src/app/historico/comunidad/[comunidad]
 
 ### H7 — Histórico en la ficha de gasolinera (depende de H1, H5)
 
-- `src/components/StationHistory.tsx` (`'use client'`), insertado en `src/app/gasolinera/[slug]/page.tsx` como sección "Evolución del precio en esta gasolinera" con props `{ stationId, idProvincia, provinciaSlug, provinciaName }`.
+- `src/components/StationHistory.tsx` (`'use client'`), insertado en `src/app/gasolinera/[slug]/page.tsx` como sección "Evolución del precio en esta gasolinera" con props `{ stationId, idProvincia, provinciaSlug, provinciaName, stationName }`.
 - Carga al montar las particiones del año actual y el anterior desde `${NEXT_PUBLIC_HISTORICO_BASE_URL ?? '/historico-estaciones'}/{idProvincia}/{year}.json` (un 404 de un año = ese año sin datos, no error). Botón "Ver desde 2016" que carga el resto de años (máx. 4 peticiones simultáneas). Une con `mergeStationPartitions` y pinta `PriceHistoryChart` (rango por defecto: Todo lo cargado).
 - Estados: cargando (esqueleto de la altura de la gráfica), error de red (mensaje + Reintentar), sin datos ("No hay histórico para esta gasolinera"), listo.
 - Debajo, enlace a `/historico/provincia/{provinciaSlug}`.

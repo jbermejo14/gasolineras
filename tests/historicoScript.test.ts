@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { findMissingWeeks, parseHistoricoArgs } from '../scripts/historico.ts';
+import { findMissingWeeks, parseHistoricoArgs, resolveHistoricoExitCode } from '../scripts/historico.ts';
 
 test('parseHistoricoArgs: sin argumentos usa los valores por defecto', () => {
   assert.deepEqual(parseHistoricoArgs([]), { until: null, upload: false, uploadAll: false });
@@ -50,4 +50,10 @@ test('findMissingWeeks: caché completa o vacía', () => {
 
 test('findMissingWeeks: ignora fechas en caché que no están en las semanas', () => {
   assert.deepEqual(findMissingWeeks(['2016-01-04'], ['1999-01-01']), ['2016-01-04']);
+});
+
+test('resolveHistoricoExitCode: 0 sin fallos, 1 con semanas o subidas fallidas', () => {
+  assert.equal(resolveHistoricoExitCode(0, 0), 0);
+  assert.equal(resolveHistoricoExitCode(2, 0), 1);
+  assert.equal(resolveHistoricoExitCode(0, 1), 1);
 });

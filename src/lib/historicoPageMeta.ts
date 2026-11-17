@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import type { AreaHistory, AreaHistoryFile, AreaKind } from './historicoFormat';
+import type { AreaHistory, AreaHistoryFile, AreaKind, HistoryFuel } from './historicoFormat';
 import { yearOfIso } from './historicoFormat';
-import { formatIsoDateEs, formatMilliEuro, summarizeSeries } from './historicoStats';
+import { formatIsoDateEs, formatMilliNumber, formatSignedPercent, summarizeSeries } from './historicoStats';
 import { loadAreaHistory } from './historico';
 import { getSiteUrl } from './miteco';
 import { SECTION_NAME } from './site';
@@ -31,26 +31,22 @@ export function buildHistoricoTitle(kind: AreaKind, name: string, weeks: readonl
   }
 }
 
-function historicoSignedPercent(changePct: number): string {
-  const sign = changePct > 0 ? '+' : '';
-  return `${sign}${changePct.toFixed(1).replace('.', ',')}`;
-}
-
-function historicoMilliNumber(milli: number): string {
-  return formatMilliEuro(milli).replace(' €/l', '');
-}
-
-function historicoPriceSentence(fuelLabel: string, area: AreaHistory, weeks: readonly string[], fuel: 'gasolina95' | 'diesel'): string | null {
+function historicoPriceSentence(
+  fuelLabel: string,
+  area: AreaHistory,
+  weeks: readonly string[],
+  fuel: HistoryFuel
+): string | null {
   const { latest, changePct } = summarizeSeries(weeks, area.series[fuel].avg);
   if (!latest) return null;
-  const change = changePct === null ? '' : ` (${historicoSignedPercent(changePct)} % en un año)`;
-  return `${fuelLabel} a ${historicoMilliNumber(latest.value)} €/l${change}`;
+  const change = changePct === null ? '' : ` (${formatSignedPercent(changePct)} en un año)`;
+  return `${fuelLabel} a ${formatMilliNumber(latest.value)} €/l${change}`;
 }
 
 function historicoMaxSentence(area: AreaHistory, weeks: readonly string[]): string | null {
   const { max } = summarizeSeries(weeks, area.series.gasolina95.avg);
   if (!max) return null;
-  return `Máximo histórico ${historicoMilliNumber(max.value)} €/l el ${formatIsoDateEs(max.date)}.`;
+  return `Máximo histórico ${formatMilliNumber(max.value)} €/l el ${formatIsoDateEs(max.date)}.`;
 }
 
 /** Descripción con las cifras actuales de gasolina 95 y diésel y el máximo histórico de gasolina 95. */
@@ -59,7 +55,8 @@ export function buildHistoricoDescription(area: AreaHistory, weeks: readonly str
     historicoPriceSentence('Gasolina 95', area, weeks, 'gasolina95'),
     historicoPriceSentence('diésel', area, weeks, 'diesel'),
   ].filter((part) => part !== null);
-  const parts = [prices.length > 0 ? `${prices.join(' y ')}.` : null, historicoMaxSentence(area, weeks), HISTORICO_DESCRIPTION_TAIL];
+  const priceText = prices.length > 0 ? `${prices.join(' y ')}.` : null;
+  const parts = [priceText, historicoMaxSentence(area, weeks), HISTORICO_DESCRIPTION_TAIL];
   return parts.filter((part) => part !== null).join(' ');
 }
 

@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { HistoricoArea } from '@/components/HistoricoArea';
-import { getAreasByKind, loadAreaHistory } from '@/lib/historico';
+import { getHistoricoStaticParams, renderHistoricoAreaPage } from '@/components/HistoricoAreaPage';
 import { buildHistoricoMetadata } from '@/lib/historicoPageMeta';
 
 export const dynamic = 'force-static';
@@ -12,7 +10,7 @@ interface PageProps {
 }
 
 export function generateStaticParams() {
-  return getAreasByKind('marca').map((area) => ({ marca: area.slug }));
+  return getHistoricoStaticParams('marca', 'marca');
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -22,8 +20,5 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function HistoricoMarcaPage({ params }: PageProps) {
   const { marca } = await params;
-  const areaFile = loadAreaHistory('marca', marca);
-  if (!areaFile) notFound();
-
-  return <HistoricoArea areaFile={areaFile} spain={loadAreaHistory('espana', 'espana')?.area ?? null} />;
+  return renderHistoricoAreaPage('marca', marca);
 }

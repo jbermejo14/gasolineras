@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import type { AreaFuelSeries, AreaHistory, AreaKind, FuelSeries } from '../src/lib/historicoFormat.ts';
-import { buildAreaIntro, formatIsoDateEs, formatMilliEuro, summarizeSeries } from '../src/lib/historicoStats.ts';
+import {
+  buildAreaIntro,
+  formatIsoDateEs,
+  formatMilliEuro,
+  formatMilliNumber,
+  formatSignedPercent,
+  summarizeSeries,
+} from '../src/lib/historicoStats.ts';
 
 const WEEK_MILLIS = 7 * 86_400_000;
 const FIRST_MONDAY = Date.UTC(2020, 0, 6);
@@ -210,5 +217,28 @@ describe('buildAreaIntro', () => {
     const none = weeks.map(() => null);
     const intro = buildAreaIntro(makeArea('provincia', 'Soria', none, none), weeks, spain);
     assert.match(intro, /todavía no hay datos/);
+  });
+});
+
+describe('formatMilliNumber', () => {
+  it('formatea sin unidad y con coma decimal', () => {
+    assert.equal(formatMilliNumber(1459), '1,459');
+    assert.equal(formatMilliNumber(980), '0,980');
+  });
+
+  it('formatMilliEuro deriva de él', () => {
+    assert.equal(formatMilliEuro(1459), `${formatMilliNumber(1459)} €/l`);
+  });
+});
+
+describe('formatSignedPercent', () => {
+  it('añade + a los positivos y conserva el - de los negativos', () => {
+    assert.equal(formatSignedPercent(3.24), '+3,2 %');
+    assert.equal(formatSignedPercent(-6.3), '-6,3 %');
+  });
+
+  it('cero y valores que redondean a cero van sin signo', () => {
+    assert.equal(formatSignedPercent(0), '0,0 %');
+    assert.equal(formatSignedPercent(0.04), '0,0 %');
   });
 });

@@ -1,4 +1,4 @@
-import { HISTORY_FUELS, HISTORY_START_DATE, mergeStationPartitions, yearOfIso } from './historicoFormat.ts';
+import { HISTORY_FUELS, HISTORY_START_DATE, yearOfIso } from './historicoFormat.ts';
 import type { FuelSeries, HistoryFuel, StationPartitionFile } from './historicoFormat.ts';
 
 /** Peticiones simultáneas máximas al cargar particiones. */
@@ -32,7 +32,8 @@ export function listMissingYears(currentYear: number, requestedYears: readonly n
 
 /**
  * Pide las particiones de los años dados con como máximo `limit` peticiones a la vez.
- * Los años sin fichero (null) se omiten. Si una petición falla, se propaga el primer error.
+ * Los años sin fichero (null) se omiten. Si una petición falla, se propaga el primer error y
+ * los demás trabajadores dejan de sacar años de la cola.
  */
 export async function loadPartitions(
   years: readonly number[],
@@ -41,26 +42,25 @@ export async function loadPartitions(
 ): Promise<StationPartitionFile[]> {
   const results: (StationPartitionFile | null)[] = new Array(years.length).fill(null);
   let nextIndex = 0;
+  let failed = false;
 
   async function stationHistoryWorker(): Promise<void> {
-    while (nextIndex < years.length) {
+    while (!failed && nextIndex < years.length) {
       const index = nextIndex;
       nextIndex += 1;
-      results[index] = await fetchPartition(years[index]);
+      try {
+        results[index] = await fetchPartition(years[index]);
+      } catch (error) {
+        // Se marca el fallo para frenar a los demás trabajadores y se relanza el error al llamante.
+        failed = true;
+        throw error;
+      }
     }
   }
 
   const workerCount = Math.max(1, Math.min(limit, years.length));
   await Promise.all(Array.from({ length: workerCount }, () => stationHistoryWorker()));
   return results.filter((file): file is StationPartitionFile => file !== null);
-}
-
-/** Une las particiones de la gasolinera en una serie continua ordenada por año. */
-export function mergeStationHistory(
-  files: readonly StationPartitionFile[],
-  stationId: string
-): StationHistoryMerged {
-  return mergeStationPartitions(files, stationId);
 }
 
 /** ¿Hay algún precio en alguno de los carburantes? */

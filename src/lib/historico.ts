@@ -32,7 +32,8 @@ function historicoReadJson<T>(filePath: string): T | null {
 
 /** Índice del histórico, o null si todavía no se ha generado. */
 export function getHistoryIndex(): HistoryIndexFile | null {
-  return historicoReadJson<HistoryIndexFile>(historicoResolvePath(HISTORICO_INDEX_FILE));
+  const index = historicoReadJson<HistoryIndexFile>(historicoResolvePath(HISTORICO_INDEX_FILE));
+  return index && index.weeks.length > 0 ? index : null;
 }
 
 /** Áreas del índice de un tipo; lista vacía si no hay índice. */
@@ -44,5 +45,6 @@ export function getAreasByKind(kind: AreaKind): AreaIndexEntry[] {
 /** Histórico completo de un área, o null si el slug no está en el índice o su fichero no existe. */
 export function loadAreaHistory(kind: AreaKind, slug: string): AreaHistoryFile | null {
   if (!getAreasByKind(kind).some((area) => area.slug === slug)) return null;
-  return historicoReadJson<AreaHistoryFile>(historicoResolvePath(HISTORICO_AREAS_DIR, kind, `${slug}.json`));
+  const file = historicoReadJson<AreaHistoryFile>(historicoResolvePath(HISTORICO_AREAS_DIR, kind, `${slug}.json`));
+  return file && file.weeks.length > 0 ? file : null;
 }

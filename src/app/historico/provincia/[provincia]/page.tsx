@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { HistoricoArea } from '@/components/HistoricoArea';
-import { getAreasByKind, loadAreaHistory } from '@/lib/historico';
+import { getHistoricoStaticParams, renderHistoricoAreaPage } from '@/components/HistoricoAreaPage';
 import { buildHistoricoMetadata } from '@/lib/historicoPageMeta';
 
 export const dynamic = 'force-static';
@@ -12,7 +10,7 @@ interface PageProps {
 }
 
 export function generateStaticParams() {
-  return getAreasByKind('provincia').map((area) => ({ provincia: area.slug }));
+  return getHistoricoStaticParams('provincia', 'provincia');
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -22,8 +20,5 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function HistoricoProvinciaPage({ params }: PageProps) {
   const { provincia } = await params;
-  const areaFile = loadAreaHistory('provincia', provincia);
-  if (!areaFile) notFound();
-
-  return <HistoricoArea areaFile={areaFile} spain={loadAreaHistory('espana', 'espana')?.area ?? null} />;
+  return renderHistoricoAreaPage('provincia', provincia);
 }

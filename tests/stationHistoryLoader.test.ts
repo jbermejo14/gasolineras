@@ -5,8 +5,8 @@ import {
   listMissingYears,
   listRecentYears,
   loadPartitions,
-  mergeStationHistory,
 } from '../src/lib/stationHistoryLoader.ts';
+import { mergeStationPartitions } from '../src/lib/historicoFormat.ts';
 import type { StationPartitionFile } from '../src/lib/historicoFormat.ts';
 
 function makePartition(year: number, deltas: (number | null)[] | null): StationPartitionFile {
@@ -66,19 +66,51 @@ test('loadPartitions: propaga el error', async () => {
   );
 });
 
-test('mergeStationHistory: une ordenado por año y decodifica', () => {
-  const merged = mergeStationHistory([makePartition(2026, [1600, 10]), makePartition(2025, [1500, 5])], '100');
-  assert.deepEqual(merged.weeks, ['2025-01-04', '2025-01-11', '2026-01-04', '2026-01-11']);
-  assert.deepEqual(merged.series.gasolina95, [1500, 1505, 1600, 1610]);
-  assert.deepEqual(merged.series.diesel, [null, null, null, null]);
-});
-
-test('mergeStationHistory: partición corrupta lanza RangeError', () => {
-  assert.throws(() => mergeStationHistory([makePartition(2025, [1500])], '100'), RangeError);
-});
-
 test('hasAnyPrice: detecta datos y ausencia de datos', () => {
-  assert.equal(hasAnyPrice(mergeStationHistory([makePartition(2025, [1500, 5])], '100')), true);
-  assert.equal(hasAnyPrice(mergeStationHistory([makePartition(2025, null)], '100')), false);
-  assert.equal(hasAnyPrice(mergeStationHistory([], '100')), false);
+  assert.equal(hasAnyPrice(mergeStationPartitions([makePartition(2025, [1500, 5])], '100')), true);
+  assert.equal(hasAnyPrice(mergeStationPartitions([makePartition(2025, null)], '100')), false);
+  assert.equal(hasAnyPrice(mergeStationPartitions([], '100')), false);
+});
+
+test('loadPartitions: sin años devuelve lista vacía sin pedir nada', async () => {
+  let calls = 0;
+  const files = await loadPartitions([], async () => {
+    calls += 1;
+    return null;
+  });
+  assert.deepEqual(files, []);
+  assert.equal(calls, 0);
+});
+
+test('loadPartitions: límite menor o igual que cero usa un solo trabajador', async () => {
+  for (const limit of [0, -3]) {
+    let active = 0;
+    let peak = 0;
+    const files = await loadPartitions([2024, 2025, 2026], async (year) => {
+      active += 1;
+      peak = Math.max(peak, active);
+      await new Promise((resolve) => setTimeout(resolve, 2));
+      active -= 1;
+      return makePartition(year, [1500, 5]);
+    }, limit);
+    assert.equal(peak, 1);
+    assert.equal(files.length, 3);
+  }
+});
+
+test('loadPartitions: tras un error no se piden más años', async () => {
+  const requested: number[] = [];
+  const years = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
+  await assert.rejects(
+    loadPartitions(years, async (year) => {
+      requested.push(year);
+      await new Promise((resolve) => setTimeout(resolve, 2));
+      if (year === 2016) throw new Error('HTTP 500');
+      return makePartition(year, [1500, 5]);
+    }, 2),
+    /HTTP 500/
+  );
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  assert.ok(requested.length < years.length, `se pidieron ${requested.length} años`);
+  assert.deepEqual(requested, [2016, 2017]);
 });

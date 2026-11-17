@@ -45,9 +45,21 @@ const MONTH_NAMES_ES = [
 ];
 const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
+/** Formatea milésimas de euro sin unidad: 1459 → '1,459'. */
+export function formatMilliNumber(value: PriceMilli): string {
+  return (value / MILLIS_PER_EURO).toFixed(3).replace('.', ',');
+}
+
 /** Formatea milésimas de euro: 1459 → '1,459 €/l'. */
 export function formatMilliEuro(value: PriceMilli): string {
-  return `${(value / MILLIS_PER_EURO).toFixed(3).replace('.', ',')} €/l`;
+  return `${formatMilliNumber(value)} €/l`;
+}
+
+/** Formatea una variación con signo y una decimal: 3.24 → '+3,2 %', -6.3 → '-6,3 %', 0 → '0,0 %'. */
+export function formatSignedPercent(value: number): string {
+  const text = historicoStatsDecimal(value);
+  const sign = Number(text.replace(',', '.')) > 0 ? '+' : '';
+  return `${sign}${text} %`;
 }
 
 /** Formatea una fecha ISO sin depender de Intl ni de la zona horaria: '2022-07-04' → '4 de julio de 2022'. */

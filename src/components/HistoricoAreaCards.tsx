@@ -1,5 +1,5 @@
 import type { AreaHistory } from '@/lib/historicoFormat';
-import { formatIsoDateEs, formatMilliEuro, summarizeSeries } from '@/lib/historicoStats';
+import { formatIsoDateEs, formatMilliEuro, formatSignedPercent, summarizeSeries } from '@/lib/historicoStats';
 import type { DatedValue, SeriesSummary } from '@/lib/historicoStats';
 import { FUEL_SHORT_LABELS } from '@/lib/miteco';
 
@@ -15,8 +15,7 @@ const HISTORICO_CARDS_NOTE_CLASS = 'text-xs text-[var(--text-dim)] mt-1';
 
 function historicoCardsChangeText(changePct: number | null): string {
   if (changePct === null) return 'Sin dato de hace un año';
-  const sign = changePct > 0 ? '+' : '';
-  return `${sign}${changePct.toFixed(1).replace('.', ',')} % en un año`;
+  return `${formatSignedPercent(changePct)} en un año`;
 }
 
 function historicoCardsExtreme(label: string, extreme: DatedValue | null): string {

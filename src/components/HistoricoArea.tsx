@@ -15,9 +15,16 @@ interface HistoricoAreaProps {
   spain: AreaHistory | null;
 }
 
+const HISTORICO_AREA_LESS_THAN_PATTERN = /</g;
+const HISTORICO_AREA_LESS_THAN_ESCAPED = '\\u003c';
 const HISTORICO_AREA_HOME_LABEL = 'Histórico de precios';
 const HISTORICO_AREA_SPAIN_NAME = 'España';
 const HISTORICO_AREA_CARD_CLASS = 'rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 md:p-8 shadow-sm';
+
+/** Serializa el JSON-LD escapando `<` para que un nombre con `</script>` no cierre la etiqueta. */
+function historicoAreaSchemaJson(schema: unknown): string {
+  return JSON.stringify(schema).replace(HISTORICO_AREA_LESS_THAN_PATTERN, HISTORICO_AREA_LESS_THAN_ESCAPED);
+}
 
 function historicoAreaChartSeries(area: AreaHistory): Partial<Record<HistoryFuel, FuelSeries>> {
   return Object.fromEntries(HISTORY_FUELS.map((fuel) => [fuel, area.series[fuel].avg]));
@@ -56,7 +63,7 @@ export function HistoricoArea({ areaFile, spain }: HistoricoAreaProps) {
   return (
     <>
       {historicoAreaSchemas(area, weeks).map((schema) => (
-        <script key={schema['@type']} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+        <script key={schema['@type']} type="application/ld+json" dangerouslySetInnerHTML={{ __html: historicoAreaSchemaJson(schema) }} />
       ))}
 
       <div className="space-y-6 md:space-y-8 min-w-0">

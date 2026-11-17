@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getMitecoData, getSiteUrl, calculateSavings50L, formatPrice } from '@/lib/miteco';
 import { InteractiveGasFinder } from '@/components/InteractiveGasFinder';
 import { getBreadcrumbSchema } from '@/lib/seo';
+import { getHistoryIndex } from '@/lib/historico';
 import { TrendingDown, MapPin, Fuel, ShieldCheck } from 'lucide-react';
 
 export const revalidate = 1800; // 30 minutos
@@ -9,6 +10,7 @@ export const revalidate = 1800; // 30 minutos
 export default async function HomePage() {
   const data = await getMitecoData();
   const siteUrl = getSiteUrl();
+  const hasHistory = getHistoryIndex() !== null;
 
   const g95Stats = data.statsNacionales.gasolina95;
   const dieselStats = data.statsNacionales.diesel;
@@ -98,13 +100,15 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <Link
-            href="/historico"
-            className="mt-4 inline-flex items-center gap-1.5 min-h-10 text-sm font-bold text-[var(--orange-primary)] hover:underline"
-          >
-            <TrendingDown className="w-4 h-4" />
-            <span>Ver evolución histórica del precio</span>
-          </Link>
+          {hasHistory && (
+            <Link
+              href="/historico"
+              className="mt-4 inline-flex items-center gap-1.5 min-h-10 text-sm font-bold text-[var(--orange-primary)] hover:underline"
+            >
+              <TrendingDown className="w-4 h-4" />
+              <span>Ver evolución histórica del precio</span>
+            </Link>
+          )}
         </div>
 
         {/* Buscador Interactivo y Mapa Nacional */}
