@@ -36,13 +36,13 @@ export default async function HomePage() {
 
       <div className="space-y-8">
         {/* Hero Section */}
-        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-6 md:p-8 shadow-md">
+        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 md:p-8 shadow-md">
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--orange-subtle)] border border-[var(--orange-border)] text-xs font-bold text-[var(--orange-primary)] mb-3">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Datos verificados del Ministerio para la Transición Ecológica</span>
             </span>
-            <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-[var(--text-main)] leading-tight">
+            <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight break-words text-[var(--text-main)] leading-tight">
               Precios de Gasolineras en España <span className="text-[var(--orange-primary)]">Hoy en Directo</span>
             </h1>
             <p className="mt-3 text-sm md:text-base text-[var(--text-muted)] leading-relaxed">
@@ -58,7 +58,7 @@ export default async function HomePage() {
                 <span>Gasolina 95 Mínima</span>
                 <Fuel className="w-4 h-4 text-[var(--orange-primary)]" />
               </div>
-              <div className="font-mono text-2xl font-extrabold text-[var(--orange-primary)] mt-1">
+              <div className="font-mono text-xl sm:text-2xl font-extrabold text-[var(--orange-primary)] mt-1">
                 {formatPrice(g95Stats.min)}
               </div>
               <div className="text-xs text-[var(--text-dim)] mt-1">Media nacional: {formatPrice(g95Stats.avg)}</div>
@@ -69,7 +69,7 @@ export default async function HomePage() {
                 <span>Diésel (Gasóleo A) Mínimo</span>
                 <Fuel className="w-4 h-4 text-[var(--orange-primary)]" />
               </div>
-              <div className="font-mono text-2xl font-extrabold text-[var(--orange-primary)] mt-1">
+              <div className="font-mono text-xl sm:text-2xl font-extrabold text-[var(--orange-primary)] mt-1">
                 {formatPrice(dieselStats.min)}
               </div>
               <div className="text-xs text-[var(--text-dim)] mt-1">Media nacional: {formatPrice(dieselStats.avg)}</div>
@@ -80,7 +80,7 @@ export default async function HomePage() {
                 <span>Ahorro Gasolina 95 (50L)</span>
                 <TrendingDown className="w-4 h-4 text-emerald-500" />
               </div>
-              <div className="font-mono text-2xl font-extrabold text-emerald-500 mt-1">
+              <div className="font-mono text-xl sm:text-2xl font-extrabold text-emerald-500 mt-1">
                 {savingsG95 !== null ? `+${savingsG95.toFixed(2)} €` : '--'}
               </div>
               <div className="text-xs text-[var(--text-dim)] mt-1">frente al promedio nacional</div>
@@ -91,7 +91,7 @@ export default async function HomePage() {
                 <span>Ahorro Diésel (50L)</span>
                 <TrendingDown className="w-4 h-4 text-emerald-500" />
               </div>
-              <div className="font-mono text-2xl font-extrabold text-emerald-500 mt-1">
+              <div className="font-mono text-xl sm:text-2xl font-extrabold text-emerald-500 mt-1">
                 {savingsDiesel !== null ? `+${savingsDiesel.toFixed(2)} €` : '--'}
               </div>
               <div className="text-xs text-[var(--text-dim)] mt-1">frente al promedio nacional</div>
@@ -101,13 +101,12 @@ export default async function HomePage() {
 
         {/* Buscador Interactivo y Mapa Nacional */}
         <InteractiveGasFinder
-          initialStations={data.estaciones}
           provinces={provincesList}
           statsNacionales={data.statsNacionales}
         />
 
         {/* Directorio de Provincias para SEO Indexable */}
-        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-6 md:p-8 shadow-sm space-y-4">
+        <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 md:p-8 shadow-sm space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <h2 className="text-xl font-extrabold text-[var(--text-main)]">
