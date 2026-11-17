@@ -17,6 +17,10 @@ yarn-error.log*
 *.swp
 *.swo
 
+# Histórico de precios
+data/historico/cache/
+public/historico-estaciones/
+
 # OS
 .DS_Store
 Thumbs.db
