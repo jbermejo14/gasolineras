@@ -30,7 +30,7 @@ const PRICE_CHART_PADDING = { top: 16, right: 16, bottom: 28, left: 56 };
 const PRICE_CHART_DEFAULT_FUELS: HistoryFuel[] = ['gasolina95', 'diesel'];
 const PRICE_CHART_DEFAULT_RANGE: PriceChartRange = 'year';
 const PRICE_CHART_FUEL_COLORS: Record<HistoryFuel, string> = {
-  gasolina95: '#ff6600',
+  gasolina95: 'var(--orange-primary)',
   diesel: '#3b82f6',
   gasolina98: '#a855f7',
   dieselPremium: '#22c55e',
@@ -60,7 +60,7 @@ const PRICE_CHART_KEYBOARD_HELP =
 const PRICE_CHART_BUTTON_CLASS =
   'shrink-0 min-h-10 px-3 rounded border text-xs font-bold transition-colors whitespace-nowrap';
 const PRICE_CHART_BUTTON_ON_CLASS =
-  'bg-[var(--orange-primary)] border-[var(--orange-primary)] text-black';
+  'bg-[var(--on-accent-bg)] border-[var(--on-accent-bg)] text-[var(--on-accent-text)]';
 const PRICE_CHART_BUTTON_OFF_CLASS =
   'bg-[var(--bg-input)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)]';
 

@@ -32,7 +32,7 @@ function GasFinderViewToggle({ view, onViewChange }: Pick<GasFinderFiltersProps,
       onClick={() => onViewChange(value)}
       className={`flex-1 sm:flex-none min-h-10 flex items-center justify-center gap-1.5 px-3 py-1 rounded-md font-bold transition-all ${
         view === value
-          ? 'bg-[var(--orange-primary)] text-black shadow-xs'
+          ? 'bg-[var(--on-accent-bg)] text-[var(--on-accent-text)] shadow-xs'
           : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
       }`}
     >
@@ -103,8 +103,8 @@ export function GasFinderFilters(props: GasFinderFiltersProps) {
             disabled={geoLoading}
             className={`min-h-10 flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold border transition-all ${
               hasLocation
-                ? 'bg-[var(--orange-primary)] text-black border-[var(--orange-primary)]'
-                : 'bg-[var(--bg-input)] text-[var(--orange-primary)] border-[var(--orange-border)] hover:bg-[var(--orange-primary)] hover:text-black'
+                ? 'bg-[var(--on-accent-bg)] text-[var(--on-accent-text)] border-[var(--on-accent-bg)]'
+                : 'bg-[var(--bg-input)] text-[var(--orange-primary)] border-[var(--orange-border)] hover:bg-[var(--on-accent-bg)] hover:text-[var(--on-accent-text)]'
             }`}
           >
             <MapPin className="w-3.5 h-3.5" />
@@ -120,7 +120,7 @@ export function GasFinderFilters(props: GasFinderFiltersProps) {
                   onClick={() => props.onRadiusChange(r)}
                   className={`min-h-9 px-2.5 rounded text-[11px] font-semibold transition-colors ${
                     radius === r
-                      ? 'bg-[var(--orange-primary)] text-black'
+                      ? 'bg-[var(--on-accent-bg)] text-[var(--on-accent-text)]'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
                   }`}
                 >

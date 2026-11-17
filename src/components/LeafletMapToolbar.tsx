@@ -25,7 +25,7 @@ export function LeafletMapToolbar({
   return (
     <div className="z-10 flex flex-wrap items-center justify-between gap-2 p-2.5 bg-[var(--bg-header)] border-b border-[var(--border-color)] text-xs">
       <div className="flex items-center gap-2 min-w-0">
-        <span className="px-2 py-0.5 rounded font-extrabold bg-[var(--orange-primary)] text-black text-[10px] tracking-wider uppercase">
+        <span className="px-2 py-0.5 rounded font-extrabold bg-[var(--on-accent-bg)] text-[var(--on-accent-text)] text-[10px] tracking-wider uppercase">
           MAPA
         </span>
         <span className="font-semibold text-[var(--text-muted)] truncate">
@@ -62,7 +62,7 @@ export function LeafletMapToolbar({
               onClick={() => onThemeChange(option.value)}
               className={`px-2 py-0.5 rounded text-[11px] font-bold transition-colors ${
                 mapTheme === option.value
-                  ? 'bg-[var(--orange-primary)] text-black'
+                  ? 'bg-[var(--on-accent-bg)] text-[var(--on-accent-text)]'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
               }`}
             >

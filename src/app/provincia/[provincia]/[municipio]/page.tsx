@@ -228,7 +228,7 @@ export default async function MunicipioPage({ params }: PageProps) {
                         {s.rotulo}
                       </Link>
                       {idx === 0 && (
-                        <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-[var(--orange-primary)] text-black text-[9px] font-extrabold uppercase">
+                        <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-[var(--on-accent-bg)] text-[var(--on-accent-text)] text-[9px] font-extrabold uppercase">
                           MÁS BARATA
                         </span>
                       )}
@@ -257,7 +257,7 @@ export default async function MunicipioPage({ params }: PageProps) {
                           href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center min-h-10 px-3 rounded bg-[var(--orange-primary)] text-black text-[11px] font-bold hover:bg-[var(--orange-hover)] transition-colors"
+                          className="inline-flex items-center min-h-10 px-3 rounded bg-[var(--on-accent-bg)] text-[var(--on-accent-text)] text-[11px] font-bold hover:bg-[var(--on-accent-hover)] transition-colors"
                           title="Ruta en Google Maps"
                         >
                           Ruta

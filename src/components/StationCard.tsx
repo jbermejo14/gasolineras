@@ -61,7 +61,7 @@ export function StationCard({ station, selectedFuel, isCheapest = false }: Stati
         </h3>
 
         {isCheapest && (
-          <span className="px-2 py-0.5 rounded bg-[var(--orange-primary)] text-black text-[10px] font-extrabold uppercase">
+          <span className="px-2 py-0.5 rounded bg-[var(--on-accent-bg)] text-[var(--on-accent-text)] text-[10px] font-extrabold uppercase">
             Más barata
           </span>
         )}
@@ -115,7 +115,7 @@ export function StationCard({ station, selectedFuel, isCheapest = false }: Stati
           href={gmapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="min-h-10 min-w-10 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-[var(--orange-primary)] text-black text-xs font-bold hover:bg-[var(--orange-hover)] transition-colors"
+          className="min-h-10 min-w-10 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-[var(--on-accent-bg)] text-[var(--on-accent-text)] text-xs font-bold hover:bg-[var(--on-accent-hover)] transition-colors"
           title="Cómo llegar en Google Maps"
         >
           <Navigation className="w-3.5 h-3.5" />

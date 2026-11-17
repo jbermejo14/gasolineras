@@ -4,7 +4,7 @@ import { BRAND_CONFIG } from '@/lib/brands';
 
 const FUEL_OPTIONS: FuelType[] = ['gasolina95', 'diesel', 'gasolina98', 'dieselPremium', 'glp', 'gnc'];
 
-const ACTIVE = 'bg-[var(--orange-primary)] text-black';
+const ACTIVE = 'bg-[var(--on-accent-bg)] text-[var(--on-accent-text)]';
 const INACTIVE =
   'bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--orange-border)]';
 // Una sola línea desplazable en móvil; en pantallas anchas se reparte en varias.

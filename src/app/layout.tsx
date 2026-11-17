@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -6,12 +7,51 @@ import { getMitecoData, getSiteUrl } from '@/lib/miteco';
 
 export const revalidate = 1800; // 30 minutos ISR
 
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['500', '700'],
+  variable: '--font-jetbrains',
+  display: 'swap',
+});
+
+/**
+ * Fija el tema antes de pintar para evitar el parpadeo: primero la elección guardada
+ * y, si no hay, la preferencia del sistema. El try/catch cubre un localStorage no disponible.
+ * Además de data-theme pone la clase dark/light, que es la que usa Tailwind.
+ */
+const THEME_SCRIPT = `
+  (function() {
+    var theme = null;
+    try {
+      var saved = localStorage.getItem('ododex-theme');
+      if (saved === 'light' || saved === 'dark') theme = saved;
+      if (!theme) {
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        theme = prefersDark ? 'dark' : 'light';
+      }
+    } catch (e) {
+      theme = 'light';
+    }
+    var root = document.documentElement;
+    root.setAttribute('data-theme', theme);
+    root.classList.remove('dark', 'light');
+    root.classList.add(theme);
+  })();
+`;
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ff6600' },
-    { media: '(prefers-color-scheme: dark)', color: '#08090b' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
   ],
 };
 
@@ -59,8 +99,9 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="es" data-theme="dark" className="dark">
+    <html lang="es" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <link
           rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"

@@ -4,7 +4,7 @@ import type { GasFinderStation } from '@/components/GasFinderLogic';
 
 const PANEL = 'rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]';
 const PRIMARY_BUTTON =
-  'min-h-10 px-4 py-2 rounded-lg bg-[var(--orange-primary)] text-black text-xs font-bold hover:bg-[var(--orange-hover)] transition-colors';
+  'min-h-10 px-4 py-2 rounded-lg bg-[var(--on-accent-bg)] text-[var(--on-accent-text)] text-xs font-bold hover:bg-[var(--on-accent-hover)] transition-colors';
 
 /** Esqueleto con alto parecido al de la lista mientras se descargan las estaciones. */
 export function GasFinderLoading() {
@@ -73,7 +73,7 @@ export function GasFinderList({ stations, totalCount, fuel, cheapestPrice, onLoa
         <div className="text-center pt-4">
           <button
             onClick={onLoadMore}
-            className="min-h-11 px-6 py-2.5 rounded-lg bg-[var(--bg-card)] border border-[var(--orange-border)] text-xs font-bold text-[var(--orange-primary)] hover:bg-[var(--orange-primary)] hover:text-black transition-all shadow-sm"
+            className="min-h-11 px-6 py-2.5 rounded-lg bg-[var(--bg-card)] border border-[var(--orange-border)] text-xs font-bold text-[var(--orange-primary)] hover:bg-[var(--on-accent-bg)] hover:text-[var(--on-accent-text)] transition-all shadow-sm"
           >
             Cargar más gasolineras ({totalCount - stations.length} restantes)
           </button>

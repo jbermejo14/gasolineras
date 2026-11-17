@@ -16,7 +16,7 @@ export default function NotFound() {
       <div className="pt-4">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-5 min-h-11 rounded-xl bg-[var(--orange-primary)] text-black font-extrabold text-xs hover:bg-[var(--orange-hover)] transition-all shadow-md shadow-[var(--orange-glow)]"
+          className="inline-flex items-center gap-2 px-5 min-h-11 rounded-xl bg-[var(--on-accent-bg)] text-[var(--on-accent-text)] font-extrabold text-xs hover:bg-[var(--on-accent-hover)] transition-all shadow-md shadow-[var(--orange-glow)]"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Volver al buscador principal</span>

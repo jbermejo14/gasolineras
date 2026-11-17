@@ -19,41 +19,45 @@ function headerShortDate(fecha: string): string {
   return time ? time.slice(0, HEADER_SHORT_TIME_LENGTH) : fecha;
 }
 
+const THEME_STORAGE_KEY = 'ododex-theme';
+
+type HeaderTheme = 'dark' | 'light';
+
+/** Aplica el tema a <html>: atributo para el CSS propio y clase para Tailwind. */
+function headerApplyTheme(theme: HeaderTheme) {
+  const root = document.documentElement;
+  root.setAttribute('data-theme', theme);
+  root.classList.remove('dark', 'light');
+  root.classList.add(theme);
+}
+
+/** Tema que ya fijó el script de layout.tsx antes de pintar. */
+function headerReadTheme(): HeaderTheme {
+  return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+}
+
 export function Header({ fechaMiteco }: HeaderProps) {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<HeaderTheme>('dark');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setTheme(headerReadTheme());
     setMounted(true);
-    const saved = localStorage.getItem('gasolineras_theme') as 'dark' | 'light' | null;
-    const initial = saved || 'dark';
-    setTheme(initial);
-    document.documentElement.setAttribute('data-theme', initial);
-    if (initial === 'light') {
-      document.documentElement.classList.add('light');
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
-    }
   }, []);
 
   const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
+    const next: HeaderTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
-    localStorage.setItem('gasolineras_theme', next);
-    document.documentElement.setAttribute('data-theme', next);
-    if (next === 'light') {
-      document.documentElement.classList.add('light');
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
+    headerApplyTheme(next);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch {
+      // Sin localStorage (modo privado, cookies bloqueadas) el tema solo dura la visita.
     }
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-[var(--bg-header)] border-b-2 border-[var(--orange-primary)] shadow-md transition-colors">
+    <header className="sticky top-0 z-50 bg-[var(--bg-header)] border-b border-[var(--border-color)] transition-colors">
       <div className="max-w-7xl mx-auto px-4 py-2 md:py-3 flex items-center justify-between gap-2 sm:gap-4">
         <Link
           href="/"
@@ -91,7 +95,7 @@ export function Header({ fechaMiteco }: HeaderProps) {
           {mounted && (
             <button
               onClick={toggleTheme}
-              className="flex items-center justify-center gap-1.5 min-w-10 h-10 px-2.5 sm:px-3 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] text-xs font-semibold text-[var(--text-main)] hover:border-[var(--orange-primary)] hover:text-[var(--orange-primary)] transition-all"
+              className="flex items-center justify-center gap-1.5 min-w-10 h-10 px-2.5 sm:px-3 rounded-[var(--radius-md)] border border-[var(--border-color)] bg-[var(--bg-card)] text-xs font-semibold text-[var(--text-main)] hover:border-[var(--orange-primary)] transition-colors cursor-pointer select-none"
               title="Cambiar Modo Claro / Oscuro"
               aria-label="Cambiar tema"
             >

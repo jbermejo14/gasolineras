@@ -208,7 +208,7 @@ export default async function GasolineraPage({ params }: PageProps) {
                 href={gmapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 min-h-12 px-4 rounded-xl bg-[var(--orange-primary)] text-black font-extrabold text-sm hover:bg-[var(--orange-hover)] transition-all shadow-md shadow-[var(--orange-glow)]"
+                className="flex items-center justify-center gap-2 min-h-12 px-4 rounded-xl bg-[var(--on-accent-bg)] text-[var(--on-accent-text)] font-extrabold text-sm hover:bg-[var(--on-accent-hover)] transition-all shadow-md shadow-[var(--orange-glow)]"
               >
                 <Navigation className="w-4 h-4" />
                 <span>Cómo llegar (GPS)</span>
