@@ -175,3 +175,12 @@ Para forzar la actualización inmediata de la caché de MITECO sin esperar a la 
 curl -X POST http://localhost:3000/api/refresh \
   -H "Authorization: Bearer tu-clave-secreta-para-recarga-manual"
 ```
+
+---
+
+## Textos legales y anuncios
+
+- **Datos del titular**: copia `config/titular.example.json` a `config/titular.json` y rellénalo (tipo `persona-fisica` o `empresa`, nombre, NIF, domicilio, correo y, para empresas, registro mercantil). `config/titular.json` está en `.gitignore` porque contiene datos personales; sin él, las páginas legales (`/aviso-legal`, `/privacidad`, `/cookies`) muestran marcadores `[pendiente: campo]`.
+- **Google AdSense**: define `NEXT_PUBLIC_ADSENSE_CLIENT` con tu identificador de editor (`ca-pub-` y 16 dígitos). Si está vacía o no es válida no se carga el script, no se publica `/ads.txt` (responde 404) y no aparece el botón "Configurar cookies" del pie.
+- **Consentimiento**: no hay banner propio. Configura el mensaje de consentimiento de la UE (IAB TCF v2.2) en la consola de AdSense, en Privacidad y mensajes; lo sirve el propio script de AdSense.
+- **`/ads.txt`**: se genera a partir de `NEXT_PUBLIC_ADSENSE_CLIENT` con la línea `google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0`.

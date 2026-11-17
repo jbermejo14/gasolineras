@@ -1,11 +1,30 @@
 import React from 'react';
 import Link from 'next/link';
+import { ConsentSettingsButton } from '@/components/ConsentSettingsButton';
+import { getAdSenseClient } from '@/lib/adsense';
+import { SITE_NAME } from '@/lib/site';
 
 interface FooterProps {
   fechaMiteco?: string;
 }
 
+const FOOTER_LINK_CLASS = 'inline-flex items-center min-h-10 hover:text-[var(--orange-primary)] transition-colors';
+
+const FOOTER_LINKS = [
+  { href: '/', label: 'Inicio' },
+  { href: '/historico', label: 'Histórico de precios' },
+  { href: '/aviso-legal', label: 'Aviso legal' },
+  { href: '/privacidad', label: 'Privacidad' },
+  { href: '/cookies', label: 'Cookies' },
+];
+
+function FooterSeparator() {
+  return <span className="text-[var(--border-color)]">&bull;</span>;
+}
+
 export function Footer({ fechaMiteco }: FooterProps) {
+  const showConsentButton = getAdSenseClient() !== null;
+
   return (
     <footer className="mt-auto border-t border-[var(--border-color)] bg-[var(--bg-header)] py-6 md:py-8 transition-colors">
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs break-words text-[var(--text-muted)]">
@@ -14,23 +33,27 @@ export function Footer({ fechaMiteco }: FooterProps) {
             Gasolineras España &bull; Información de carburantes en tiempo real
           </p>
           <p className="mt-1">
-            <strong>Fuente oficial:</strong> Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO).
+            Datos: Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO). {SITE_NAME} no está vinculado al Ministerio.
             {fechaMiteco && <span> Última sincronización: <strong>{fechaMiteco}</strong>.</span>}
           </p>
+          <p className="mt-1">Los precios pueden no coincidir con los del surtidor.</p>
         </div>
 
-        <div className="flex items-center gap-4 flex-wrap">
-          <Link href="/" className="inline-flex items-center min-h-10 hover:text-[var(--orange-primary)] transition-colors">
-            Inicio
-          </Link>
-          <span className="text-[var(--border-color)]">&bull;</span>
-          <Link href="/historico" className="inline-flex items-center min-h-10 hover:text-[var(--orange-primary)] transition-colors">
-            Histórico de precios
-          </Link>
-          <span className="text-[var(--border-color)]">&bull;</span>
-          <span className="px-2.5 py-1 rounded bg-[var(--bg-card)] border border-[var(--orange-border)] text-[var(--orange-primary)] font-bold text-[11px]">
-            SEO PROGRAMÁTICO
-          </span>
+        <div className="flex items-center gap-x-4 flex-wrap">
+          {FOOTER_LINKS.map(link => (
+            <React.Fragment key={link.href}>
+              <Link href={link.href} className={FOOTER_LINK_CLASS}>
+                {link.label}
+              </Link>
+              <FooterSeparator />
+            </React.Fragment>
+          ))}
+          {showConsentButton && (
+            <>
+              <ConsentSettingsButton />
+              <FooterSeparator />
+            </>
+          )}
         </div>
       </div>
     </footer>

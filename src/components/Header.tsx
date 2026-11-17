@@ -75,7 +75,7 @@ export function Header({ fechaMiteco }: HeaderProps) {
               Gasolineras <span className="text-[var(--orange-primary)]">España</span>
             </span>
             <p className="text-xs text-[var(--text-muted)] hidden lg:block">
-              Precios oficiales del Ministerio para la Transición Ecológica (MITECO)
+              Datos oficiales de MITECO
             </p>
           </div>
         </Link>

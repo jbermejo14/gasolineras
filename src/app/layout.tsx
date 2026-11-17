@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
+import 'leaflet/dist/leaflet.css';
 import './globals.css';
+import { AdSenseScript } from '@/components/AdSenseScript';
+import { SITE_NAME } from '@/lib/site';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getMitecoData, getSiteUrl } from '@/lib/miteco';
@@ -61,8 +64,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(siteUrl),
     title: {
-      default: 'Precios de Gasolineras en España Hoy | Actualizado cada 30 min (MITECO)',
-      template: '%s | Gasolineras España (MITECO)',
+      default: 'Precio de la gasolina hoy en España: gasolineras más baratas | Ododex',
+      template: `%s | ${SITE_NAME}`,
     },
     description:
       'Consulta el precio de la gasolina 95, diésel y GLP en más de 11.500 gasolineras de España con datos oficiales del Ministerio para la Transición Ecológica actualizados cada 30 minutos.',
@@ -73,7 +76,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       locale: 'es_ES',
       url: siteUrl,
-      siteName: 'Gasolineras España',
+      siteName: SITE_NAME,
       title: 'Precios de Gasolineras en España Hoy en Tiempo Real',
       description:
         'Encuentra las gasolineras más baratas por provincia, municipio y código postal con datos oficiales de MITECO.',
@@ -102,17 +105,12 @@ export default async function RootLayout({
     <html lang="es" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-          crossOrigin=""
-        />
       </head>
       <body className="min-h-screen flex flex-col bg-[var(--bg-main)] text-[var(--text-main)] antialiased">
         <Header fechaMiteco={fechaMiteco} />
         <main className="flex-1 min-w-0 max-w-7xl w-full mx-auto px-4 py-4 md:py-8">{children}</main>
         <Footer fechaMiteco={fechaMiteco} />
+        <AdSenseScript />
       </body>
     </html>
   );

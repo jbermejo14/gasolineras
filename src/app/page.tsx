@@ -42,7 +42,7 @@ export default async function HomePage() {
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--orange-subtle)] border border-[var(--orange-border)] text-xs font-bold text-[var(--orange-primary)] mb-3">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Datos verificados del Ministerio para la Transición Ecológica</span>
+              <span>Datos oficiales de MITECO</span>
             </span>
             <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight break-words text-[var(--text-main)] leading-tight">
               Precios de Gasolineras en España <span className="text-[var(--orange-primary)]">Hoy en Directo</span>

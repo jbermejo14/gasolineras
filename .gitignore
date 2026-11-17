@@ -24,3 +24,6 @@ public/historico-estaciones/
 # OS
 .DS_Store
 Thumbs.db
+
+# Datos personales del titular (ver config/titular.example.json)
+/config/titular.json
