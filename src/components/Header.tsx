@@ -2,7 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Sun, Moon, Fuel, RefreshCw, Layers, Navigation } from 'lucide-react';
+import { BrandLogo } from '@/components/BrandLogo';
+import { SITE_NAME, SECTION_NAME } from '@/lib/site';
+import { Sun, Moon, RefreshCw, Layers, Navigation } from 'lucide-react';
 
 // Longitud de HH:MM
 const HEADER_SHORT_TIME_LENGTH = 5;
@@ -53,15 +55,22 @@ export function Header({ fechaMiteco }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 bg-[var(--bg-header)] border-b-2 border-[var(--orange-primary)] shadow-md transition-colors">
       <div className="max-w-7xl mx-auto px-4 py-2 md:py-3 flex items-center justify-between gap-2 sm:gap-4">
-        <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-lg bg-gradient-to-br from-[var(--orange-primary)] to-[var(--orange-dark)] flex items-center justify-center text-black font-extrabold shadow-md">
-            <Fuel className="w-6 h-6 text-black" />
-          </div>
+        <Link
+          href="/"
+          className="flex items-center gap-2 sm:gap-3 group min-w-0"
+          aria-label={`${SITE_NAME} · ${SECTION_NAME}, inicio`}
+        >
+          <BrandLogo />
+          <span aria-hidden="true" className="w-px h-7 sm:h-8 bg-[var(--border-color)] shrink-0" />
           <div className="min-w-0">
-            <span className="block truncate text-sm sm:text-xl font-extrabold tracking-tight text-[var(--text-main)] group-hover:text-[var(--orange-primary)] transition-colors">
-              GASOLINERAS <span className="text-[var(--orange-primary)]">ESPAÑA</span>
+            <span className="block sm:hidden text-[11px] leading-tight font-extrabold uppercase text-[var(--text-main)]">
+              Gasolineras
+              <span className="block text-[var(--orange-primary)]">España</span>
             </span>
-            <p className="text-xs text-[var(--text-muted)] hidden sm:block">
+            <span className="hidden sm:block truncate text-base font-extrabold uppercase text-[var(--text-main)] group-hover:text-[var(--orange-primary)] transition-colors">
+              Gasolineras <span className="text-[var(--orange-primary)]">España</span>
+            </span>
+            <p className="text-xs text-[var(--text-muted)] hidden lg:block">
               Precios oficiales del Ministerio para la Transición Ecológica (MITECO)
             </p>
           </div>

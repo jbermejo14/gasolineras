@@ -45,7 +45,7 @@ export function LeafletMap({
   useEffect(() => {
     const root = document.documentElement;
     const isLight = root.getAttribute('data-theme') === 'light' || root.classList.contains('light');
-    setMapTheme(isLight ? 'carto' : 'dark');
+    setMapTheme(isLight ? 'osm' : 'dark');
   }, []);
 
   // Inicializar el mapa (Leaflet se importa de forma dinámica por no ser compatible con SSR)

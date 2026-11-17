@@ -1,10 +1,9 @@
 import type * as Leaflet from 'leaflet';
 
-export type MapLayerType = 'dark' | 'carto' | 'osm' | 'sat';
+export type MapLayerType = 'dark' | 'osm' | 'sat';
 
 export const MAP_LAYER_OPTIONS: ReadonlyArray<{ value: MapLayerType; label: string }> = [
   { value: 'dark', label: 'Oscuro' },
-  { value: 'carto', label: 'CARTO' },
   { value: 'osm', label: 'OSM' },
   { value: 'sat', label: 'Satélite' },
 ];
@@ -17,7 +16,6 @@ export const MAP_SIZE_CLASSES = 'h-[70vh] min-h-[420px] max-h-[760px] md:h-[600p
 
 const DARK_MAX_NATIVE_ZOOM = 16;
 const SATELLITE_MAX_NATIVE_ZOOM = 18;
-const CARTO_MAX_NATIVE_ZOOM = 20;
 const OSM_MAX_NATIVE_ZOOM = 19;
 
 const ESRI_BASE = 'https://services.arcgisonline.com/arcgis/rest/services';
@@ -25,15 +23,6 @@ const ESRI_BASE = 'https://services.arcgisonline.com/arcgis/rest/services';
 /** Crea las capas de teselas de un tipo de mapa (sin añadirlas al mapa). */
 export function createTileLayers(L: typeof Leaflet, layer: MapLayerType): Leaflet.TileLayer[] {
   switch (layer) {
-    case 'carto':
-      return [
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-          attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-          subdomains: 'abcd',
-          maxZoom: MAP_MAX_ZOOM,
-          maxNativeZoom: CARTO_MAX_NATIVE_ZOOM,
-        }),
-      ];
     case 'dark':
       return [
         L.tileLayer(`${ESRI_BASE}/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {

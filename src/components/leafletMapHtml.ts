@@ -1,4 +1,5 @@
 import type { FuelType } from '@/lib/miteco';
+import { getStationBrand } from '@/lib/brands';
 import type { EstacionLigera } from '@/lib/stationPayload';
 
 interface ClusterSizeTier {
@@ -15,7 +16,8 @@ const CLUSTER_SIZE_TIERS: readonly ClusterSizeTier[] = [
   { maxCountExclusive: Infinity, modifier: 'large', sizePx: 56 },
 ];
 
-const PIN_ICON_SIZE: [number, number] = [60, 24];
+const PIN_ICON_SIZE: [number, number] = [112, 38];
+const PIN_LOGO_SIZE_PX = 14;
 const PRICE_DECIMALS = 3;
 
 const HTML_ESCAPES: Record<string, string> = {
@@ -71,12 +73,20 @@ export interface PinIconSpec {
   iconSize: [number, number];
 }
 
-/** Contenido del pin de precio de una estación suelta. */
-export function buildPinIconSpec(price: number | null, isHighlight: boolean): PinIconSpec {
-  const extraClasses = isHighlight ? ' ring-2 ring-white scale-110' : '';
+/** Contenido del pin de una estación suelta: logo de la marca (si la hay), rótulo y precio. */
+export function buildPinIconSpec(station: EstacionLigera, price: number | null, isHighlight: boolean): PinIconSpec {
+  const brand = getStationBrand(station.rotulo);
+  const highlightClass = isHighlight ? ' custom-station-pin--highlight' : '';
+  const logo = brand
+    ? `<img class="custom-station-pin__logo" src="${escapeHtml(brand.logo)}" alt="" width="${PIN_LOGO_SIZE_PX}" height="${PIN_LOGO_SIZE_PX}">`
+    : '';
   const label = price === null ? '⛽' : `${formatPrice(price)}€`;
   return {
-    html: `<div class="custom-station-pin${extraClasses}">${label}</div>`,
+    html:
+      `<div class="custom-station-pin${highlightClass}">` +
+      `<span class="custom-station-pin__head">${logo}<span class="custom-station-pin__name">${escapeHtml(station.rotulo)}</span></span>` +
+      `<span class="custom-station-pin__price">${label}</span>` +
+      `</div>`,
     iconSize: PIN_ICON_SIZE,
   };
 }

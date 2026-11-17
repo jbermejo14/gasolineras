@@ -32,24 +32,33 @@ export function StationCard({ station, selectedFuel, isCheapest = false }: Stati
       }`}
     >
       <div className="flex items-center justify-between gap-2 min-w-0">
-        {brand ? (
-          <div className="inline-flex min-w-0 items-center gap-2 bg-white border border-[var(--border-color)] px-2.5 py-1 rounded-md shadow-xs">
-            <Image
-              src={brand.logo}
-              alt={brand.name}
-              width={40}
-              height={20}
-              className="h-5 w-auto object-contain"
-            />
-            <span className="text-xs font-bold text-neutral-900 uppercase tracking-tight break-words min-w-0">
-              {station.rotulo}
-            </span>
-          </div>
-        ) : (
-          <span className="min-w-0 break-words px-2.5 py-1 rounded bg-[var(--bg-input)] border border-[var(--orange-border)] text-[var(--orange-primary)] text-xs font-bold uppercase tracking-tight">
-            {station.rotulo}
-          </span>
-        )}
+        <h3 className="min-w-0">
+          <Link
+            href={fichaUrl}
+            className={
+              brand
+                ? 'inline-flex min-w-0 max-w-full items-center gap-2 bg-white border border-[var(--border-color)] hover:border-[var(--orange-primary)] px-2.5 py-1 rounded-md shadow-xs transition-colors'
+                : 'inline-block min-w-0 max-w-full break-words px-2.5 py-1 rounded bg-[var(--bg-input)] border border-[var(--orange-border)] hover:border-[var(--orange-primary)] text-[var(--orange-primary)] text-xs font-bold uppercase tracking-tight transition-colors'
+            }
+          >
+            {brand ? (
+              <>
+                <Image
+                  src={brand.logo}
+                  alt={brand.name}
+                  width={40}
+                  height={20}
+                  className="h-5 w-auto object-contain"
+                />
+                <span className="text-xs font-bold text-neutral-900 uppercase tracking-tight break-words min-w-0">
+                  {station.rotulo}
+                </span>
+              </>
+            ) : (
+              station.rotulo
+            )}
+          </Link>
+        </h3>
 
         {isCheapest && (
           <span className="px-2 py-0.5 rounded bg-[var(--orange-primary)] text-black text-[10px] font-extrabold uppercase">
@@ -59,12 +68,7 @@ export function StationCard({ station, selectedFuel, isCheapest = false }: Stati
       </div>
 
       <div className="min-w-0">
-        <h3 className="font-bold text-base text-[var(--text-main)] leading-snug break-words">
-          <Link href={fichaUrl} className="hover:text-[var(--orange-primary)] transition-colors">
-            {station.rotulo}
-          </Link>
-        </h3>
-        <p className="text-xs text-[var(--text-muted)] mt-0.5 flex items-start gap-1">
+        <p className="text-xs text-[var(--text-muted)] flex items-start gap-1">
           <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0 text-[var(--text-dim)]" />
           <span className="min-w-0 break-words">
             {station.direccion}, {station.municipio} ({station.provincia})

@@ -51,7 +51,7 @@ function createStationMarker(params: MarkerSyncParams, station: EstacionLigera):
   const { L, fuel, highlightStationId } = params;
   const price = resolveStationPrice(station, fuel);
   const isHighlight = station.id === highlightStationId;
-  const pin = buildPinIconSpec(price, isHighlight);
+  const pin = buildPinIconSpec(station, price, isHighlight);
   const icon = L.divIcon({
     className: 'custom-station-pin-wrapper',
     html: pin.html,
