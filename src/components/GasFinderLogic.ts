@@ -1,7 +1,7 @@
 import type { FuelType } from '@/lib/miteco';
 import type { EstacionLigera } from '@/lib/stationPayload';
 // Ruta relativa con extensión para que Node pueda importar el módulo en las pruebas.
-import { BRAND_CONFIG } from '../lib/brands.ts';
+import { BRAND_CONFIG, matchesBrand } from '../lib/brands.ts';
 
 /** Número de tarjetas que se añaden cada vez que se pulsa "Cargar más". */
 export const GAS_FINDER_PAGE_SIZE = 36;
@@ -87,7 +87,7 @@ export function gasFinderFilterStations(
 
   const brandConfig = brand ? BRAND_CONFIG[brand] : undefined;
   if (brandConfig) {
-    list = list.filter((s) => brandConfig.keywords.some((k) => s.rotulo.toLowerCase().includes(k)));
+    list = list.filter((s) => matchesBrand(s.rotulo, brandConfig));
   }
 
   const query = search.trim().toLowerCase();

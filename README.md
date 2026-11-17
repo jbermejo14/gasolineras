@@ -36,7 +36,7 @@ Genera páginas indexables en el servidor para **52 provincias**, **~3.250 munic
    - Endpoint de revalidación forzada `POST /api/refresh` protegido mediante token Bearer (`REFRESH_SECRET`).
 
 5. **Rendimiento y Modo Oscuro/Claro**:
-   - Logos corporativos optimizados en formato **WebP** servidos con `next/image` (~100 KB en total frente a 440 KB originales).
+   - Logos corporativos optimizados en formato **WebP** servidos con `next/image` (14 marcas, ~160 KB en total).
    - Carga dinámica del mapa Leaflet (`ssr: false`) en componentes cliente independientes.
    - Soporte nativo de Modo Oscuro y Modo Claro con paleta Negro y Naranja persistente en `localStorage`.
    - Diseño adaptado a móvil (desde 360 px): filas de filtros desplazables en horizontal, controles táctiles de 40 px, campos de 16 px para evitar el zoom automático de iOS y mapa al 70 % del alto de pantalla.
