@@ -783,3 +783,22 @@ En el equipo del titular, una política de Control de Aplicaciones bloquea los b
 Resultado medido el 17/11/2026:
 - El build genera 14 930 páginas en unos 4 minutos y 90 224 ficheros en `out/`.
 - `../ododex-sitio` lo reduce a 16 296 ficheros (unos 1 000 MB) en `dist-gasolineras/`.
+
+## A. Anuncios
+
+Bloques manuales de AdSense según la sección 8 de `../ododex-sitio/ARCHITECTURE.md`.
+
+- `src/components/AdSlot.tsx` (componente de cliente): no renderiza nada si `NEXT_PUBLIC_ADSENSE_CLIENT` no es `ca-pub-` más 16 dígitos o `NEXT_PUBLIC_ADSENSE_SLOT` no tiene 10 dígitos (validación en `src/lib/adsense.ts`: `getAdSenseClient`, `getAdSenseSlot`). Hace el `push` una sola vez (`useEffect` y `useRef`) y registra con `console.error` si falla. Muestra la etiqueta "Publicidad".
+- La clase `.ad-slot` está en `src/app/globals.css`, dentro de `@layer components` (el CSS usa `@import "tailwindcss"`, así que las utilidades de Tailwind prevalecen sobre ella). Reserva 280 px de alto en móvil y 250 px desde `md`; usa `--bg-card`, `--border-color`, `--radius-lg` y `--text-muted`.
+- Huecos (máximo 3 por página; ninguno dentro del mapa, de la lista de resultados ni cerca de botones):
+
+| Página | Hueco 1 | Hueco 2 |
+|---|---|---|
+| `/` | tras el buscador interactivo (mapa y resultados) y antes del directorio de provincias | al final, antes del pie |
+| `/provincia/[provincia]` | tras el encabezado con el resumen de precios | al final |
+| `/provincia/[provincia]/[municipio]` | tras la tabla de precios | al final |
+| `/gasolinera/[slug]` | tras la ficha de precios | al final, tras el mapa |
+| `/historico` y subpáginas (`HistoricoArea`) | tras la gráfica | al final |
+
+- Sin anuncios: `/aviso-legal`, `/privacidad`, `/cookies` y la 404.
+- Pruebas: `tests/adslot.test.ts` (configuración, marcado, páginas legales sin `AdSlot`, máximo 3 por página). No renderiza el componente porque las pruebas corren con `node --experimental-strip-types`, que no admite JSX.

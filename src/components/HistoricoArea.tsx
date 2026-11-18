@@ -1,3 +1,4 @@
+import { AdSlot } from '@/components/AdSlot';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { PriceHistoryChart } from '@/components/PriceHistoryChart';
 import { HistoricoAreaCards } from '@/components/HistoricoAreaCards';
@@ -86,6 +87,8 @@ export function HistoricoArea({ areaFile, spain }: HistoricoAreaProps) {
           />
         </div>
 
+        <AdSlot />
+
         <section className={`${HISTORICO_AREA_CARD_CLASS} space-y-4 min-w-0`}>
           <h2 className="text-lg md:text-xl font-extrabold text-[var(--text-main)]">Precio medio por año</h2>
           <HistoricoAreaTable area={area} weeks={weeks} />
@@ -97,6 +100,8 @@ export function HistoricoArea({ areaFile, spain }: HistoricoAreaProps) {
           Cada punto es el precio medio de todas las gasolineras del área el lunes de esa semana. Fuente: MITECO.
           Último dato: {formatIsoDateEs(weeks[weeks.length - 1])}.
         </p>
+
+        <AdSlot />
       </div>
     </>
   );

@@ -11,6 +11,7 @@ import {
   FuelType,
   FUEL_LABELS,
 } from '@/lib/miteco';
+import { AdSlot } from '@/components/AdSlot';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { StationCard } from '@/components/StationCard';
 import { getBreadcrumbSchema } from '@/lib/seo';
@@ -200,6 +201,8 @@ export default async function ProvinciaPage({ params }: PageProps) {
           )}
         </div>
 
+        <AdSlot />
+
         {/* Top Más Baratas Gasolina 95 */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -264,6 +267,8 @@ export default async function ProvinciaPage({ params }: PageProps) {
             ))}
           </div>
         </div>
+
+        <AdSlot />
       </div>
     </>
   );

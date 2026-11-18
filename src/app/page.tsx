@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { calculateSavings50L, formatPrice } from '@/lib/miteco';
 import { getMitecoData } from '@/lib/mitecoSnapshot';
 import { absoluteUrl } from '@/lib/site';
+import { AdSlot } from '@/components/AdSlot';
 import { InteractiveGasFinder } from '@/components/InteractiveGasFinder';
 import { getBreadcrumbSchema } from '@/lib/seo';
 import { getHistoryIndex } from '@/lib/historico';
@@ -116,6 +117,8 @@ export default async function HomePage() {
           statsNacionales={data.statsNacionales}
         />
 
+        <AdSlot />
+
         {/* Directorio de Provincias para SEO Indexable */}
         <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 md:p-8 shadow-sm space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -149,6 +152,8 @@ export default async function HomePage() {
             ))}
           </div>
         </div>
+
+        <AdSlot />
       </div>
     </>
   );

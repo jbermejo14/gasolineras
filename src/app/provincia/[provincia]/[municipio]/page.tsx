@@ -12,6 +12,7 @@ import {
 } from '@/lib/miteco';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { StationCard } from '@/components/StationCard';
+import { AdSlot } from '@/components/AdSlot';
 import { ClientMapWrapper } from '@/components/ClientMapWrapper';
 import { getBreadcrumbSchema } from '@/lib/seo';
 import { Fuel, TrendingDown, MapPin, Building2, Navigation } from 'lucide-react';
@@ -278,6 +279,8 @@ export default async function MunicipioPage({ params }: PageProps) {
           </div>
         </div>
 
+        <AdSlot />
+
         {/* Tarjetas Visuales de las Gasolineras del Municipio */}
         <div className="space-y-4">
           <h2 className="text-lg md:text-xl font-extrabold text-[var(--text-main)]">
@@ -323,6 +326,8 @@ export default async function MunicipioPage({ params }: PageProps) {
             </div>
           </div>
         )}
+
+        <AdSlot />
       </div>
     </>
   );

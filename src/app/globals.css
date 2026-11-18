@@ -310,3 +310,30 @@ body {
     max-width: 280px;
   }
 }
+
+/* Hueco de anuncio manual (AdSlot). Va en @layer components para que las utilidades de Tailwind puedan ajustarlo. */
+@layer components {
+  .ad-slot {
+    width: 100%;
+    max-width: 100%;
+    min-height: 280px;
+    overflow: hidden;
+    padding: 8px 16px 16px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+  }
+
+  .ad-slot__label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  @media (min-width: 768px) {
+    .ad-slot {
+      min-height: 250px;
+    }
+  }
+}

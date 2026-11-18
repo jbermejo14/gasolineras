@@ -14,6 +14,7 @@ import { absoluteUrl, assetPath } from '@/lib/site';
 import { getStationBrand } from '@/lib/brands';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { InternalLink } from '@/components/InternalLink';
+import { AdSlot } from '@/components/AdSlot';
 import { ClientMapWrapper } from '@/components/ClientMapWrapper';
 import { StationHistory } from '@/components/StationHistory';
 import { getBreadcrumbSchema, getGasStationSchema } from '@/lib/seo';
@@ -299,6 +300,8 @@ export default async function GasolineraPage({ params }: PageProps) {
           </div>
         </div>
 
+        <AdSlot />
+
         {/* Histórico semanal de precios de esta estación */}
         <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 md:p-6 shadow-sm space-y-4">
           <h2 className="text-lg md:text-xl font-extrabold text-[var(--text-main)] flex items-center gap-2">
@@ -327,6 +330,8 @@ export default async function GasolineraPage({ params }: PageProps) {
             highlightStationId={station.id}
           />
         </div>
+
+        <AdSlot />
       </div>
     </>
   );

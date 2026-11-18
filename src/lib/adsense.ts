@@ -12,3 +12,17 @@ export function getAdSenseClient(): string | null {
   return isValidAdSenseClient(client) ? client : null;
 }
 
+
+/** Formato de la unidad de anuncio de AdSense (`data-ad-slot`): 10 dígitos. */
+export const ADSENSE_SLOT_PATTERN = /^\d{10}$/;
+
+/** Indica si la unidad de anuncio tiene exactamente 10 dígitos. */
+export function isValidAdSenseSlot(slot: string): boolean {
+  return ADSENSE_SLOT_PATTERN.test(slot);
+}
+
+/** Unidad de anuncio configurada en el entorno, o null si falta o no es válida. */
+export function getAdSenseSlot(): string | null {
+  const slot = process.env.NEXT_PUBLIC_ADSENSE_SLOT ?? '';
+  return isValidAdSenseSlot(slot) ? slot : null;
+}
