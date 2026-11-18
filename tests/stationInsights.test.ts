@@ -189,7 +189,9 @@ test('stationSummary: puesto intermedio sin empate', () => {
 
 test('formatKm usa un decimal y coma', () => {
   assert.equal(formatKm(2.34), '2,3 km');
-  assert.equal(formatKm(0), '0,0 km');
+  assert.equal(formatKm(0.1), '0,1 km');
+  assert.equal(formatKm(0), 'menos de 100 m');
+  assert.equal(formatKm(0.04), 'menos de 100 m');
 });
 
 test('stationLabel sustituye rótulos ilegibles por la dirección y limpia espacios', () => {

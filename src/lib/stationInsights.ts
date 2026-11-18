@@ -12,6 +12,7 @@ const EARTH_RADIUS_KM = 6371;
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const EURO_DECIMALS = 2;
 const KM_DECIMALS = 1;
+const SHORT_DISTANCE_KM = 0.1;
 const CENTS_TOLERANCE = 0.005;
 const MIN_STATIONS_TO_RANK = 2;
 const UNREADABLE_LABEL_PREFIX = 'nº';
@@ -57,6 +58,8 @@ export function formatEuros(value: number): string {
 
 /** Distancia con un decimal y coma: 2,3 km. */
 export function formatKm(km: number): string {
+  // Con un decimal, las distancias muy cortas saldrían como "0,0 km".
+  if (km < SHORT_DISTANCE_KM) return 'menos de 100 m';
   return `${km.toFixed(KM_DECIMALS).replace('.', ',')} km`;
 }
 
