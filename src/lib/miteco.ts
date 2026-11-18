@@ -4,6 +4,8 @@
  * del Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO).
  */
 
+import { formatProvinceName } from './provinceNames.ts';
+
 export interface PreciosCombustible {
   gasolina95: number | null;
   diesel: number | null;
@@ -324,10 +326,12 @@ export function processRawMitecoData(
     const idProvincia = String(item.IDProvincia || '').trim();
     const idMunicipio = String(item.IDMunicipio || '').trim();
 
-    const provinciaNombre = (provNameById.get(idProvincia) || item.Provincia || '').trim().toUpperCase();
+    const provinciaNombreOficial = (provNameById.get(idProvincia) || item.Provincia || '').trim().toUpperCase();
     const municipioNombre = (item.Municipio || '').trim();
 
-    const provinciaSlug = slugify(provinciaNombre);
+    // El slug se calcula del nombre oficial; el nombre mostrado es el legible.
+    const provinciaSlug = slugify(provinciaNombreOficial);
+    const provinciaNombre = formatProvinceName(provinciaNombreOficial);
     const municipioSlug = slugify(municipioNombre);
     const rotulo = (item['Rótulo'] || 'GASOLINERA').trim();
     const slug = slugify(`${rotulo}-${municipioNombre}-${id}`);
