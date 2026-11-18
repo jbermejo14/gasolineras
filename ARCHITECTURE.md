@@ -802,3 +802,99 @@ Bloques manuales de AdSense según la sección 8 de `../ododex-sitio/ARCHITECTUR
 
 - Sin anuncios: `/aviso-legal`, `/privacidad`, `/cookies` y la 404.
 - Pruebas: `tests/adslot.test.ts` (configuración, marcado, páginas legales sin `AdSlot`, máximo 3 por página). No renderiza el componente porque las pruebas corren con `node --experimental-strip-types`, que no admite JSX.
+
+## S. Contenido propio de las fichas de gasolinera (SEO, noviembre de 2026)
+
+### S.1 Objetivo y alcance
+
+La auditoría SEO del 18/11/2026 (`../ododex-sitio/docs/09-auditoria-seo-2026-11.md`) midió unas 145 palabras y 8 enlaces internos por ficha de gasolinera (11 530 páginas). Google puede tratarlas como contenido a escala de poco valor. Cada ficha debe aportar algo que no esté en ninguna otra página y enlazar a sus vecinas.
+
+Dentro del alcance:
+
+- una frase de resumen calculada;
+- las gasolineras cercanas;
+- los nombres de provincia legibles;
+- la coma decimal en todos los importes;
+- un título más corto.
+
+Fuera del alcance:
+
+- enlaces a otras secciones de Ododex;
+- cambios en la portada, en las páginas de provincia o municipio (salvo lo que cambie solo por el nombre de provincia) y en el histórico;
+- cambiar URLs o slugs.
+
+### S.2 Módulos
+
+#### S1 — `src/lib/provinceNames.ts`
+
+- `formatProvinceName(raw: string): string` convierte el nombre de provincia de MITECO (en mayúsculas y con artículos pospuestos) en un nombre legible. Ejemplos:
+  - "CIUDAD REAL" → "Ciudad Real";
+  - "CORUÑA (A)" → "A Coruña";
+  - "PALMAS (LAS)" → "Las Palmas";
+  - "BALEARS (ILLES)" → "Illes Balears";
+  - "RIOJA (LA)" → "La Rioja";
+  - "ALICANTE/ALACANT" → "Alicante/Alacant";
+  - "SANTA CRUZ DE TENERIFE" → "Santa Cruz de Tenerife".
+- Reglas: minúsculas para las preposiciones y artículos interiores (de, del, la, las, los, y) y respeto de las tildes ("ÁVILA" → "Ávila").
+- Un nombre que ya venga en formato mixto se devuelve igual.
+- Se aplica en `processRawMitecoData` (`src/lib/miteco.ts`) al campo `provincia` de estaciones, provincias y municipios.
+- **`provinciaSlug` debe seguir saliendo idéntico al actual.** El slug se calcula del nombre original, no del formateado.
+- Hay que revisar `src/lib/ccaa.ts`, el histórico y cualquier comparación por nombre de provincia: deben seguir funcionando, preferiblemente por slug o por id.
+
+#### S2 — `src/lib/stationInsights.ts` (funciones puras, sin E/S)
+
+- `distanceKm(a: {lat, lon}, b: {lat, lon}): number`: distancia haversine.
+- `municipalityRank(station: Gasolinera, stations: Gasolinera[], fuel: FuelType): { position: number; total: number } | null`:
+  - devuelve la posición de la estación entre las del municipio que tienen precio para ese combustible, de más barata (1) a más cara;
+  - si hay empate, comparten posición;
+  - devuelve `null` si la estación no tiene precio de ese combustible.
+- `nearbyStations(station: Gasolinera, candidates: Gasolinera[], options?: { maxKm?: number; limit?: number }): Array<{ station: Gasolinera; km: number }>`:
+  - devuelve las estaciones más cercanas (sin incluirse a sí misma), dentro de `maxKm` y ordenadas por distancia;
+  - valores por defecto en constantes con nombre: `NEARBY_MAX_KM = 10` y `NEARBY_LIMIT = 6`.
+- `stationSummary(station: Gasolinera, municipalityStations: Gasolinera[]): string` devuelve un párrafo en español, con coma decimal, que combine:
+  - el puesto en diésel y en gasolina 95, por ejemplo: "Es la 3.ª gasolinera más barata de las 7 de Valdepeñas en diésel y la 5.ª en gasolina 95";
+  - el coste de llenar 50 litros y la diferencia con la media del municipio, por ejemplo: "Llenar 50 litros de diésel cuesta 96,70 €, 4,40 € más que la media del municipio";
+  - **casos especiales:**
+    - única estación del municipio: "Es la única gasolinera de X con precio publicado hoy";
+    - estación sin uno de los dos combustibles: se omite esa parte;
+    - estación sin ninguno: frase que lo diga y nombre los combustibles que sí vende.
+- `formatEuros(value: number): string`: dos decimales con coma y " €" (81,70 €).
+
+#### S3 — Ficha `src/app/gasolinera/[slug]/page.tsx`
+
+- **Título:** `Gasolinera ${rotulo} en ${municipio}: precios hoy`. **Descripción:** como ahora, pero con la provincia ya formateada. En `openGraph.siteName` se usa `SITE_NAME` de `src/lib/site.ts`, en lugar de "Gasolineras España".
+- **Bajo el `h1`:** un párrafo con `stationSummary(...)`.
+- **Importes:**
+  - todos los "€ por depósito" y "50L = …" pasan por `formatEuros`;
+  - los precios por litro, por `formatPrice` o con la misma coma;
+  - no queda ningún `toFixed(...)` mostrado al usuario sin coma.
+- **Sección nueva "Gasolineras cercanas"** (`h2`), tras los precios y antes del histórico.
+  - **Candidatas:** se buscan en la misma provincia (`data.provinciasMap`). Para no recalcular en cada página, se cachea a nivel de módulo lo que haga falta.
+  - **Lista:** la de `nearbyStations`. Cada elemento lleva:
+    - rótulo y municipio, con `InternalLink` a la ficha;
+    - distancia ("a 2,3 km");
+    - precio de gasolina 95 y de diésel;
+    - una marca "más barata" en el combustible en que lo sea respecto a esta estación.
+  - **Cierre de la sección:** enlace a "Todas las gasolineras de <municipio>".
+  - **Sin ninguna cercana:** no se pinta la sección.
+- Se mantienen los `AdSlot` existentes. Como máximo 3 por página.
+
+### S.3 Orden
+
+S1 → S2 → S3.
+
+### S.4 Criterios de aceptación
+
+- **Pruebas** (`npm test`; corren con `node --experimental-strip-types`, sin JSX) para:
+  - `formatProvinceName`, con los ejemplos de S1 y todos los nombres de provincia presentes en `data/cache/miteco-snapshot.json` si existe. La prueba que lea ese fichero se salta si no está;
+  - la igualdad de `provinciaSlug` antes y después, comprobada con `processRawMitecoData` sobre la fixture de pruebas;
+  - `municipalityRank` (empates y sin precio);
+  - `nearbyStations` (orden, límite, exclusión de sí misma, radio);
+  - `stationSummary` (caso general, única estación, sin diésel, sin ninguno de los dos);
+  - `formatEuros`.
+- `npx tsc --noEmit` pasa.
+- **Prueba estática:** el código fuente de la ficha no muestra importes con `toFixed(` sin pasar por `formatEuros`, `formatPrice` o la coma.
+- **En pantalla** (sesión principal):
+  - una ficha con varias estaciones en el municipio y otra con una sola;
+  - el texto de resumen, las cercanas y los enlaces;
+  - 375 y 1280 px.
