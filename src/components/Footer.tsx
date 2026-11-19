@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ConsentSettingsButton } from '@/components/ConsentSettingsButton';
 import { getAdSenseClient } from '@/lib/adsense';
+import { getRedSections } from '@/lib/red';
 import { SITE_NAME } from '@/lib/site';
 
 interface FooterProps {
@@ -17,6 +18,27 @@ const FOOTER_LINKS = [
   { href: '/privacidad', label: 'Privacidad' },
   { href: '/cookies', label: 'Cookies' },
 ];
+
+/** Bloque con las demás webs de la red de Ododex; no pinta nada si no hay red. */
+function FooterNetwork() {
+  const sections = getRedSections();
+  if (sections.length === 0) return null;
+
+  return (
+    <nav aria-label="Otras webs de Ododex" className="max-w-7xl mx-auto px-4 mt-4 pt-4 border-t border-[var(--border-color)] text-xs text-[var(--text-muted)]">
+      <p className="font-semibold text-[var(--text-main)]">Otras webs de Ododex</p>
+      <ul className="mt-1 flex flex-wrap gap-x-4">
+        {sections.map(section => (
+          <li key={section.ruta}>
+            <a href={section.ruta} title={section.descripcion} className={FOOTER_LINK_CLASS}>
+              {section.nombre}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 function FooterSeparator() {
   return <span className="text-[var(--border-color)]">&bull;</span>;
@@ -56,6 +78,7 @@ export function Footer({ fechaMiteco }: FooterProps) {
           )}
         </div>
       </div>
+      <FooterNetwork />
     </footer>
   );
 }

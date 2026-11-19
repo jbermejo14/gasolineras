@@ -13,6 +13,8 @@ import {
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { StationCard } from '@/components/StationCard';
 import { AdSlot } from '@/components/AdSlot';
+import { RedLinks } from '@/components/RedLinks';
+import { municipalityRedKey } from '@/lib/red';
 import { ClientMapWrapper } from '@/components/ClientMapWrapper';
 import { getBreadcrumbSchema } from '@/lib/seo';
 import { Fuel, TrendingDown, MapPin, Building2, Navigation } from 'lucide-react';
@@ -326,6 +328,8 @@ export default async function MunicipioPage({ params }: PageProps) {
             </div>
           </div>
         )}
+
+        <RedLinks pageKey={municipalityRedKey(provSlug, munSlug)} />
 
         <AdSlot />
       </div>

@@ -17,6 +17,8 @@ import { getStationBrand } from '@/lib/brands';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { InternalLink } from '@/components/InternalLink';
 import { AdSlot } from '@/components/AdSlot';
+import { RedLinks } from '@/components/RedLinks';
+import { municipalityRedKey } from '@/lib/red';
 import { ClientMapWrapper } from '@/components/ClientMapWrapper';
 import { StationHistory } from '@/components/StationHistory';
 import { getBreadcrumbSchema, getGasStationSchema } from '@/lib/seo';
@@ -406,6 +408,8 @@ export default async function GasolineraPage({ params }: PageProps) {
             highlightStationId={station.id}
           />
         </div>
+
+        <RedLinks pageKey={municipalityRedKey(station.provinciaSlug, station.municipioSlug)} />
 
         <AdSlot />
       </div>

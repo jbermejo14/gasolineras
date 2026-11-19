@@ -12,6 +12,8 @@ import {
   FUEL_LABELS,
 } from '@/lib/miteco';
 import { AdSlot } from '@/components/AdSlot';
+import { RedLinks } from '@/components/RedLinks';
+import { provinceRedKey } from '@/lib/red';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { StationCard } from '@/components/StationCard';
 import { getBreadcrumbSchema } from '@/lib/seo';
@@ -267,6 +269,8 @@ export default async function ProvinciaPage({ params }: PageProps) {
             ))}
           </div>
         </div>
+
+        <RedLinks pageKey={provinceRedKey(provSlug)} />
 
         <AdSlot />
       </div>

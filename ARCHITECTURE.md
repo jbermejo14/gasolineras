@@ -898,3 +898,10 @@ S1 → S2 → S3.
   - una ficha con varias estaciones en el municipio y otra con una sola;
   - el texto de resumen, las cercanas y los enlaces;
   - 375 y 1280 px.
+
+# Parte 4 — Enlaces de la red de Ododex
+
+- `src/lib/red.ts` lee en compilación el fichero indicado por `ODODEX_RED_ENLACES` (formato en la sección 10 de `ododex-sitio/ARCHITECTURE.md`), con caché en memoria. Sin variable o sin fichero devuelve `null` (sin enlaces, sin error); JSON roto o `version !== 1` lanza un `Error` en español. Pruebas en `tests/red.test.ts`.
+- `src/components/RedLinks.tsx` pinta « En Ododex también » (h2 y lista de `texto`) al final de la página de provincia, de la de municipio y de la ficha de gasolinera (esta con la clave de su municipio, `/es/gasolineras/provincia/{provincia}/{municipio}`), antes del último `AdSlot`. No pinta nada si no hay enlaces.
+- `Footer` añade « Otras webs de Ododex » con las `secciones` de la red excluyendo la propia (`BASE_PATH`).
+- Los `href` son de otra sección y se pintan con `<a href={...}>` tal cual: no usan `InternalLink`, `next/link` ni `assetPath`.
