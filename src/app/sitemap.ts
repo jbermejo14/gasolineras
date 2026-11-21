@@ -31,18 +31,27 @@ function sitemapHistoricoEntries(): MetadataRoute.Sitemap {
   }
 }
 
+function parseMitecoDate(str?: string): Date {
+  if (!str) return new Date();
+  const match = str.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}):(\d{2}))?/);
+  if (!match) return new Date();
+  const [, day, month, year, h = '00', m = '00', s = '00'] = match;
+  const d = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), Number(h), Number(m), Number(s)));
+  return isNaN(d.getTime()) ? new Date() : d;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const data = await getMitecoData();
-  const now = new Date();
+  const lastModified = parseMitecoDate(data.fechaMiteco);
 
   const entries: MetadataRoute.Sitemap = [
-    { url: absoluteUrl('/'), lastModified: now, changeFrequency: 'daily', priority: SITEMAP_HOME_PRIORITY },
+    { url: absoluteUrl('/'), lastModified, changeFrequency: 'daily', priority: SITEMAP_HOME_PRIORITY },
   ];
 
   for (const prov of data.provinciasMap.values()) {
     entries.push({
       url: absoluteUrl(`/provincia/${prov.provinciaSlug}`),
-      lastModified: now,
+      lastModified,
       changeFrequency: 'daily',
       priority: SITEMAP_PROVINCE_PRIORITY,
     });
@@ -51,7 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const mun of data.municipiosMap.values()) {
     entries.push({
       url: absoluteUrl(`/provincia/${mun.provinciaSlug}/${mun.municipioSlug}`),
-      lastModified: now,
+      lastModified,
       changeFrequency: 'daily',
       priority: SITEMAP_MUNICIPALITY_PRIORITY,
     });
@@ -60,7 +69,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const station of data.estaciones) {
     entries.push({
       url: absoluteUrl(`/gasolinera/${station.id}-${station.slug}`),
-      lastModified: now,
+      lastModified,
       changeFrequency: 'daily',
       priority: SITEMAP_STATION_PRIORITY,
     });

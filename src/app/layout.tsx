@@ -58,6 +58,7 @@ export const viewport: Viewport = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const homeUrl = absoluteUrl('/');
+  const ogImage = absoluteUrl('/brand/ododex-og.png');
 
   return {
     metadataBase: new URL(getSiteUrl()),
@@ -66,7 +67,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s | ${SITE_NAME}`,
     },
     description:
-      'Consulta el precio de la gasolina 95, diésel y GLP en más de 11.500 gasolineras de España con datos oficiales del Ministerio para la Transición Ecológica actualizados cada día.',
+      'Precio de la gasolina 95, diésel y GLP hoy en cada gasolinera de España. Encuentra las estaciones más baratas de tu municipio con datos oficiales de MITECO.',
     alternates: {
       canonical: homeUrl,
     },
@@ -78,6 +79,21 @@ export async function generateMetadata(): Promise<Metadata> {
       title: 'Precios de Gasolineras en España Hoy',
       description:
         'Encuentra las gasolineras más baratas por provincia, municipio y código postal con datos oficiales de MITECO.',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: 'Precio de Gasolineras en España · Ododex',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Precios de Gasolineras en España Hoy',
+      description:
+        'Encuentra las gasolineras más baratas por provincia, municipio y código postal con datos oficiales de MITECO.',
+      images: [ogImage],
     },
     robots: {
       index: true,
