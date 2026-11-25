@@ -6,7 +6,12 @@ import type { Metadata } from 'next';
 import { loadMitecoSnapshot, MITECO_SNAPSHOT_FILE } from '../src/lib/mitecoSnapshot.ts';
 import type { Gasolinera, MitecoSnapshot } from '../src/lib/miteco.ts';
 import { buildMunicipalityMetadata, buildProvinceMetadata, buildStationMetadata } from '../src/lib/pageMetadata.ts';
-import { buildStationDescription, buildStationTitle } from '../src/lib/pageSeoText.ts';
+import {
+  buildMunicipalityDescription,
+  buildProvinceDescription,
+  buildStationDescription,
+  buildStationTitle,
+} from '../src/lib/pageSeoText.ts';
 import { buildHistoricoMetadata } from '../src/lib/historicoPageMeta.ts';
 import { getAreasByKind } from '../src/lib/historico.ts';
 import type { AreaKind } from '../src/lib/historicoFormat.ts';
@@ -242,4 +247,17 @@ test('el histórico (España y todas las áreas) cumple título, descripción e 
 test('ninguna página de src/app redefine openGraph a mano: usan buildSocialMetadata', () => {
   const offenders = collectSourceFiles(APP_DIR).filter((file) => /openGraph\s*:/.test(fs.readFileSync(file, 'utf8')));
   assert.deepEqual(offenders, []);
+});
+
+test('la descripción de municipio escribe los precios en minúscula tras los dos puntos', () => {
+  const description = buildMunicipalityDescription('Getafe', 'Madrid', { count: 12, minG95: 1.459, minDiesel: 1.399 });
+  assert.match(description, /con precios oficiales: gasolina 95 desde /);
+});
+
+test('la descripción de provincia concuerda en singular y pone mayúscula a la frase de precios', () => {
+  const one = buildProvinceDescription('Soria', { count: 1, minG95: 1.459, minDiesel: null });
+  assert.match(one, /: 1 gasolinera comparada\./);
+  assert.match(one, /\. Gasolina 95 desde /);
+  const many = buildProvinceDescription('Soria', { count: 3, minG95: 1.459, minDiesel: null });
+  assert.match(many, /: 3 gasolineras comparadas\./);
 });

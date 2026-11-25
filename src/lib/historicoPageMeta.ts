@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import type { AreaHistory, AreaHistoryFile, AreaKind, HistoryFuel } from './historicoFormat';
-import { yearOfIso } from './historicoFormat';
+import { HISTORY_START_DATE, yearOfIso } from './historicoFormat';
 import { formatIsoDateEs, formatMilliNumber, formatSignedPercent, summarizeSeries } from './historicoStats';
 import { loadAreaHistory } from './historico';
 import { absoluteUrl } from './site';
@@ -12,7 +12,7 @@ const HISTORICO_NOT_FOUND_TITLE = 'Histórico de precios no encontrado';
 const HISTORICO_EMPTY_TITLE = 'Histórico de precios de carburantes';
 const HISTORICO_EMPTY_DESCRIPTION = 'El histórico de precios de carburantes todavía no se ha generado.';
 const HISTORICO_DESCRIPTION_TAIL = 'Gráfica semanal con datos oficiales de MITECO.';
-const HISTORICO_DESCRIPTION_WEEKLY = 'Series semanales desde 2016.';
+const HISTORICO_DESCRIPTION_WEEKLY = `Series semanales desde ${yearOfIso(HISTORY_START_DATE)}.`;
 const HISTORICO_SPAIN_PAGE_TITLE = 'Precio histórico de gasolina y diésel en España';
 
 /** Ruta de la página de histórico de un área ('/historico' para España). */

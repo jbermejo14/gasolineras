@@ -5,7 +5,7 @@ import { SITE_NAME, absoluteUrl } from './site.ts';
 export const SOCIAL_IMAGE_PATH = '/brand/ododex-og.png';
 export const SOCIAL_IMAGE_WIDTH = 1200;
 export const SOCIAL_IMAGE_HEIGHT = 630;
-export const SOCIAL_IMAGE_ALT = 'Precio de Gasolineras en España · Ododex';
+export const SOCIAL_IMAGE_ALT = 'Precio de gasolineras en España · Ododex';
 export const SOCIAL_LOCALE = 'es_ES';
 
 export interface SocialMetadataInput {

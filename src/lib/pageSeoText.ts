@@ -23,13 +23,22 @@ function pluralStations(count: number): string {
   return count === 1 ? '1 estación' : `${count} estaciones`;
 }
 
-/** 'Gasolina 95 desde 1,459 €/l y diésel desde 1,399 €/l' (solo los combustibles con precio), o null. */
-function minimumPricesPhrase(minG95: number | null, minDiesel: number | null): string | null {
+function comparedStations(count: number): string {
+  return count === 1 ? '1 gasolinera comparada' : `${count} gasolineras comparadas`;
+}
+
+/**
+ * 'Gasolina 95 desde 1,459 €/l y diésel desde 1,399 €/l' (solo los combustibles con precio), o null.
+ * Con `startsSentence` la inicial va en mayúscula (frase propia); sin él, en minúscula (tras « : »).
+ */
+function minimumPricesPhrase(input: AreaPricesInput, startsSentence: boolean): string | null {
   const parts = [
-    minG95 !== null ? `Gasolina 95 desde ${formatPrice(minG95)}` : null,
-    minDiesel !== null ? `diésel desde ${formatPrice(minDiesel)}` : null,
+    input.minG95 !== null ? `gasolina 95 desde ${formatPrice(input.minG95)}` : null,
+    input.minDiesel !== null ? `diésel desde ${formatPrice(input.minDiesel)}` : null,
   ].filter((part): part is string => part !== null);
-  return parts.length > 0 ? capitalizeFirst(parts.join(' y ')) : null;
+  if (parts.length === 0) return null;
+  const phrase = parts.join(' y ');
+  return startsSentence ? capitalizeFirst(phrase) : phrase;
 }
 
 /** 'Ávila (Ávila)' sobra: si municipio y provincia coinciden solo se escribe el nombre. */
@@ -57,8 +66,8 @@ export function buildProvinceTitle(province: string): string {
 
 /** Descripción de la página de una provincia (120-160 caracteres). */
 export function buildProvinceDescription(province: string, input: AreaPricesInput): string {
-  const prices = minimumPricesPhrase(input.minG95, input.minDiesel);
-  const head = `Precios de combustible en ${province} hoy: ${input.count} gasolineras comparadas.`;
+  const prices = minimumPricesPhrase(input, true);
+  const head = `Precios de combustible en ${province} hoy: ${comparedStations(input.count)}.`;
   return fitDescription(
     [
       joinSentences(head, prices && `${prices}.`, 'Ahorra repostando en tu provincia.'),
@@ -93,7 +102,8 @@ export function buildMunicipalityTitle(municipality: string, province: string): 
 
 /** Descripción de la página de un municipio (120-160 caracteres). */
 export function buildMunicipalityDescription(municipality: string, province: string, input: AreaPricesInput): string {
-  const prices = minimumPricesPhrase(input.minG95, input.minDiesel);
+  const prices = minimumPricesPhrase(input, false);
+  const pricesSentence = minimumPricesPhrase(input, true);
   const compare = `Compara ${pluralStations(input.count)} con precios oficiales`;
   const withPrices = (lead: string) => joinSentences(lead, prices ? `${compare}: ${prices}.` : `${compare}.`);
   const shortMun = shortPlaceName(municipality);
@@ -102,7 +112,7 @@ export function buildMunicipalityDescription(municipality: string, province: str
       withPrices(`Consulta las gasolineras más baratas en ${placeWithProvince(municipality, province)} hoy.`),
       withPrices(`Gasolineras más baratas en ${municipality} hoy.`),
       withPrices(`Gasolineras en ${shortMun}.`),
-      joinSentences(`Gasolineras en ${shortMun}: ${pluralStations(input.count)}.`, prices && `${prices}.`),
+      joinSentences(`Gasolineras en ${shortMun}: ${pluralStations(input.count)}.`, pricesSentence && `${pricesSentence}.`),
     ],
     AREA_FILLERS
   );
