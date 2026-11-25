@@ -4,6 +4,8 @@ import 'leaflet/dist/leaflet.css';
 import './globals.css';
 import { AdSenseScript } from '@/components/AdSenseScript';
 import { SITE_NAME, absoluteUrl, getSiteUrl } from '@/lib/site';
+import { buildSocialMetadata } from '@/lib/socialMetadata';
+import { HOME_DESCRIPTION, HOME_SOCIAL_TITLE, HOME_TITLE } from '@/lib/homeSeoText';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getMitecoData } from '@/lib/mitecoSnapshot';
@@ -57,44 +59,17 @@ export const viewport: Viewport = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const homeUrl = absoluteUrl('/');
-  const ogImage = absoluteUrl('/brand/ododex-og.png');
-
   return {
     metadataBase: new URL(getSiteUrl()),
     title: {
-      default: 'Precio de la gasolina hoy en España: gasolineras más baratas | Ododex',
+      default: HOME_TITLE,
       template: `%s | ${SITE_NAME}`,
     },
-    description:
-      'Precio de la gasolina 95, diésel y GLP hoy en cada gasolinera de España. Encuentra las estaciones más baratas de tu municipio con datos oficiales de MITECO.',
+    description: HOME_DESCRIPTION,
     alternates: {
-      canonical: homeUrl,
+      canonical: absoluteUrl('/'),
     },
-    openGraph: {
-      type: 'website',
-      locale: 'es_ES',
-      url: homeUrl,
-      siteName: SITE_NAME,
-      title: 'Precios de Gasolineras en España Hoy',
-      description:
-        'Encuentra las gasolineras más baratas por provincia, municipio y código postal con datos oficiales de MITECO.',
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: 'Precio de Gasolineras en España · Ododex',
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: 'Precios de Gasolineras en España Hoy',
-      description:
-        'Encuentra las gasolineras más baratas por provincia, municipio y código postal con datos oficiales de MITECO.',
-      images: [ogImage],
-    },
+    ...buildSocialMetadata({ title: HOME_SOCIAL_TITLE, description: HOME_DESCRIPTION, path: '/' }),
     robots: {
       index: true,
       follow: true,

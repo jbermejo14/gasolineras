@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { InternalLink } from '@/components/InternalLink';
 import { getMitecoData } from '@/lib/mitecoSnapshot';
 import { absoluteUrl } from '@/lib/site';
+import { buildProvinceMetadata } from '@/lib/pageMetadata';
 import {
   calcularTodasLasStats,
   calculateSavings50L,
@@ -44,28 +45,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const canonical = absoluteUrl(`/provincia/${provincia}`);
-  const stats = calcularTodasLasStats(provObj.estaciones);
-  const minG95 = stats.gasolina95.min;
-  const minDiesel = stats.diesel.min;
-
-  const title = `Gasolineras más baratas en ${provObj.provincia} hoy | Precios MITECO`;
-  const description = `Precios de combustible en ${provObj.provincia} hoy: ${provObj.estaciones.length} gasolineras comparadas. Gasolina 95 desde ${formatPrice(minG95)} y diésel desde ${formatPrice(minDiesel)}. Ahorra repostando en tu provincia.`;
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical,
-    },
-    openGraph: {
-      type: 'website',
-      url: canonical,
-      title,
-      description,
-      siteName: 'Gasolineras España',
-    },
-  };
+  return buildProvinceMetadata(provObj);
 }
 
 export default async function ProvinciaPage({ params }: PageProps) {

@@ -14,5 +14,5 @@ test('la ficha de gasolinera no muestra importes con toFixed sin coma', () => {
 test('la ficha pasa los importes por formatEuros y usa SITE_NAME en openGraph', () => {
   const source = fs.readFileSync(PAGE_PATH, 'utf8');
   assert.match(source, /formatEuros\(price \* TANK_LITERS\)/);
-  assert.match(source, /siteName: SITE_NAME/);
+  assert.match(source, /buildStationMetadata\(station\)/);
 });

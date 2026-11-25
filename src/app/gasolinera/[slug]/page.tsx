@@ -11,7 +11,7 @@ import {
   type Gasolinera,
 } from '@/lib/miteco';
 import { getMitecoData } from '@/lib/mitecoSnapshot';
-import { absoluteUrl, assetPath, SITE_NAME } from '@/lib/site';
+import { absoluteUrl, assetPath } from '@/lib/site';
 import { formatEuros, formatKm, nearbyStations, stationLabel, stationSummary, TANK_LITERS } from '@/lib/stationInsights';
 import { getStationBrand } from '@/lib/brands';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
@@ -22,14 +22,10 @@ import { municipalityRedKey } from '@/lib/red';
 import { ClientMapWrapper } from '@/components/ClientMapWrapper';
 import { StationHistory } from '@/components/StationHistory';
 import { getBreadcrumbSchema, getGasStationSchema } from '@/lib/seo';
+import { buildStationMetadata, stationPagePath } from '@/lib/pageMetadata';
 import { Clock, MapPin, Navigation, Fuel, ShieldCheck, ArrowLeft, LineChart } from 'lucide-react';
 
 export const dynamicParams = false;
-
-/** Ruta interna de la ficha de una gasolinera: /gasolinera/<id>-<slug>. */
-function gasolineraStationPath(station: { id: string; slug: string }): string {
-  return `/gasolinera/${station.id}-${station.slug}`;
-}
 
 /** Una página por gasolinera de la instantánea de MITECO. */
 export async function generateStaticParams() {
@@ -56,30 +52,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: 'Gasolinera no encontrada', robots: { index: false, follow: false } };
   }
 
-  const canonical = absoluteUrl(gasolineraStationPath(station));
-
-  const pG95 = station.precios.gasolina95 ? formatPrice(station.precios.gasolina95) : null;
-  const pDiesel = station.precios.diesel ? formatPrice(station.precios.diesel) : null;
-
-  const title = `Gasolinera ${station.rotulo} en ${station.municipio}: precios hoy`;
-  const description = `Consulta los precios hoy en la estación ${station.rotulo} (${station.direccion}, ${station.municipio}): ${
-    pG95 ? `Gasolina 95: ${pG95}. ` : ''
-  }${pDiesel ? `Diésel: ${pDiesel}. ` : ''}Horario ${station.horario} y cómo llegar con GPS.`;
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical,
-    },
-    openGraph: {
-      type: 'website',
-      url: canonical,
-      title,
-      description,
-      siteName: SITE_NAME,
-    },
-  };
+  return buildStationMetadata(station);
 }
 
 const NEARBY_FUELS: ReadonlyArray<{ fuel: FuelType; label: string }> = [
@@ -99,7 +72,7 @@ function NearbyStationItem({ current, near, km }: NearbyStationItemProps) {
   return (
     <li className="p-3.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] space-y-2 min-w-0">
       <InternalLink
-        href={gasolineraStationPath(near)}
+        href={stationPagePath(near)}
         className="block text-sm font-bold text-[var(--text-main)] hover:text-[var(--orange-primary)] break-words"
       >
         {stationLabel(near)}
@@ -177,14 +150,14 @@ export default async function GasolineraPage({ params }: PageProps) {
   const breadcrumbs = [
     { label: station.provincia, href: `/provincia/${station.provinciaSlug}` },
     { label: station.municipio, href: `/provincia/${station.provinciaSlug}/${station.municipioSlug}` },
-    { label: `${station.rotulo} (${station.id})`, href: gasolineraStationPath(station) },
+    { label: `${station.rotulo} (${station.id})`, href: stationPagePath(station) },
   ];
 
   const breadcrumbSchema = getBreadcrumbSchema([
     { name: 'Inicio', url: absoluteUrl('/') },
     { name: station.provincia, url: absoluteUrl(`/provincia/${station.provinciaSlug}`) },
     { name: station.municipio, url: absoluteUrl(`/provincia/${station.provinciaSlug}/${station.municipioSlug}`) },
-    { name: `${station.rotulo} (${station.id})`, url: absoluteUrl(gasolineraStationPath(station)) },
+    { name: `${station.rotulo} (${station.id})`, url: absoluteUrl(stationPagePath(station)) },
   ]);
 
   const gasStationSchema = getGasStationSchema({
@@ -198,7 +171,7 @@ export default async function GasolineraPage({ params }: PageProps) {
     horario: station.horario,
     lat: station.lat,
     lon: station.lon,
-    url: absoluteUrl(gasolineraStationPath(station)),
+    url: absoluteUrl(stationPagePath(station)),
     precios: station.precios as unknown as Record<string, number | null>,
   });
 

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { InternalLink } from '@/components/InternalLink';
 import { getMitecoData } from '@/lib/mitecoSnapshot';
 import { absoluteUrl } from '@/lib/site';
+import { buildMunicipalityMetadata } from '@/lib/pageMetadata';
 import dynamic from 'next/dynamic';
 import {
   calcularTodasLasStats,
@@ -47,28 +48,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const canonical = absoluteUrl(`/provincia/${provSlug}/${munSlug}`);
-  const stats = calcularTodasLasStats(munObj.estaciones);
-  const minG95 = stats.gasolina95.min;
-  const minDiesel = stats.diesel.min;
-
-  const title = `Gasolineras más baratas en ${munObj.municipio} hoy (${munObj.provincia}) | Precios MITECO`;
-  const description = `Consulta las gasolineras más baratas en ${munObj.municipio} (${munObj.provincia}) hoy. Compara ${munObj.estaciones.length} estaciones con precios oficiales: Gasolina 95 desde ${formatPrice(minG95)} y diésel desde ${formatPrice(minDiesel)}.`;
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical,
-    },
-    openGraph: {
-      type: 'website',
-      url: canonical,
-      title,
-      description,
-      siteName: 'Gasolineras España',
-    },
-  };
+  return buildMunicipalityMetadata(munObj);
 }
 
 export default async function MunicipioPage({ params }: PageProps) {
